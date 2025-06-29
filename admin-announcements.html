@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anúncios e Mensagens - Admin</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h3 {
+            color: white;
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: white;
+            padding-left: 25px;
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-left-color: white;
+        }
+        
+        .main-content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+            flex: 1;
+            padding: 80px 20px 20px 20px;
+        }
+        
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .admin-header {
+            background: white;
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-header h1 {
+            margin: 0;
+            color: #667eea;
+            font-size: 2rem;
+        }
+        
+        .admin-header p {
+            margin: 5px 0 0 0;
+            color: #666;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .back-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+
+        .back-btn:hover::before {
+            left: 100%;
+        }
+
+        .back-btn:active {
+            transform: translateY(-1px) scale(1.02);
+            transition: all 0.1s ease;
+        }
+
+        .back-btn .btn-icon {
+            font-size: 16px;
+            font-weight: 900;
+            transition: transform 0.3s ease;
+        }
+
+        .back-btn:hover .btn-icon {
+            transform: translateX(-2px);
+        }
+        
+        .announcements-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .announcement-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .announcement-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .announcement-card h3 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 1.3rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .select-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        
+        .select-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .announcements-list {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .announcements-list h3 {
+            margin: 0 0 25px 0;
+            color: #333;
+            font-size: 1.3rem;
+        }
+        
+        .announcement-item {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .announcement-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.1);
+        }
+        
+        .announcement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .announcement-title {
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        
+        .announcement-type {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .type-announcement {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .type-message {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .type-alert {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .announcement-content {
+            color: #666;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+        
+        .announcement-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #999;
+        }
+        
+        .announcement-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .announcements-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .main-content {
+                padding: 80px 15px 20px 15px;
+            }
+            
+            .admin-header {
+                padding: 20px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .admin-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .announcement-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .announcement-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    
+    <!-- Overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>🛡️ Admin Panel</h3>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" style="background: rgba(255, 255, 255, 0.1); border-left: 4px solid #4CAF50; margin-bottom: 10px;">
+                    ← Tela Inicial App
+                </a>
+                <a href="admin.html">
+                    📊 Dashboard Admin
+                </a>
+                <a href="admin-users.html">
+                    👥 Usuários
+                </a>
+                <a href="admin-pedidos.html">
+                    🙏 Pedidos de Oração
+                </a>
+                <a href="#" class="active">
+                    📢 Anúncios / Mensagens
+                </a>
+                <a href="admin.html" onclick="showSection('settings')">
+                    ⚙️ Configurações
+                </a>
+                <a href="#" onclick="sidebarLogout()">
+                    🚪 Sair
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="admin-container">
+                <!-- Header -->
+                <div class="admin-header">
+                    <div>
+                        <h1>📢 Anúncios e Mensagens</h1>
+                        <p>Gerencie comunicações com os usuários</p>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <a href="admin.html" class="back-btn">
+                            <span class="btn-icon">←</span>
+                        </a>
+                        <button class="btn btn-primary" onclick="showCreateForm()">
+                            ✉️ Nova Mensagem
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Create/Edit Forms -->
+                <div class="announcements-grid" id="formsSection">
+                    <!-- Criar Anúncio -->
+                    <div class="announcement-card">
+                        <h3>📢 Criar Anúncio</h3>
+                        <form id="announcementForm">
+                            <div class="form-group">
+                                <label for="announcementTitle">Título do Anúncio</label>
+                                <input type="text" id="announcementTitle" class="form-control" placeholder="Ex: Manutenção do Sistema" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="announcementType">Tipo</label>
+                                <select id="announcementType" class="select-control" required>
+                                    <option value="">Selecione o tipo</option>
+                                    <option value="general">📢 Anúncio Geral</option>
+                                    <option value="prayer">🙏 Oração</option>
+                                    <option value="event">📅 Evento</option>
+                                    <option value="maintenance">🔧 Manutenção</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="announcementContent">Conteúdo</label>
+                                <textarea id="announcementContent" class="form-control" placeholder="Digite o conteúdo do anúncio..." required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="announcementPriority">Prioridade</label>
+                                <select id="announcementPriority" class="select-control" required>
+                                    <option value="low">🟢 Baixa</option>
+                                    <option value="medium" selected>🟡 Média</option>
+                                    <option value="high">🟠 Alta</option>
+                                    <option value="urgent">🔴 Urgente</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                📢 Publicar Anúncio
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Enviar Mensagem -->
+                    <div class="announcement-card">
+                        <h3>✉️ Enviar Mensagem</h3>
+                        <form id="messageForm">
+                            <div class="form-group">
+                                <label for="messageRecipient">Destinatário</label>
+                                <select id="messageRecipient" class="select-control" required>
+                                    <option value="">Selecione o destinatário</option>
+                                    <option value="all">👥 Todos os Usuários</option>
+                                    <option value="active">✅ Usuários Ativos</option>
+                                    <option value="admins">🛡️ Apenas Administradores</option>
+                                    <option value="specific">👤 Usuário Específico</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" id="specificUserGroup" style="display: none;">
+                                <label for="specificUser">Email do Usuário</label>
+                                <input type="email" id="specificUser" class="form-control" placeholder="usuario@email.com">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="messageTitle">Título da Mensagem</label>
+                                <input type="text" id="messageTitle" class="form-control" placeholder="Ex: Bem-vindo ao sistema!" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="messageContent">Conteúdo</label>
+                                <textarea id="messageContent" class="form-control" placeholder="Digite sua mensagem..." required></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-success" style="width: 100%;">
+                                ✉️ Enviar Mensagem
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Lista de Anúncios e Mensagens -->
+                <div class="announcements-list">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                        <h3>📋 Histórico de Comunicações</h3>
+                        <div>
+                            <select id="filterType" class="select-control" style="width: auto; margin-right: 10px;" onchange="filterAnnouncements()">
+                                <option value="all">Todos</option>
+                                <option value="announcement">Anúncios</option>
+                                <option value="message">Mensagens</option>
+                                <option value="alert">Alertas</option>
+                            </select>
+                            <button class="btn btn-secondary" onclick="loadAnnouncements()">
+                                🔄 Atualizar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="announcementsList">
+                        <div class="loading">Carregando comunicações...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Detecta automaticamente a URL base
+        const isLocaltunnel = window.location.hostname.includes('.loca.lt');
+        const API_BASE_URL = isLocaltunnel 
+            ? `${window.location.protocol}//${window.location.hostname}/api`
+            : `${window.location.protocol}//${window.location.hostname}:${window.location.port || '3000'}/api`;
+        
+        let announcements = [];
+        
+        // Função para obter token da sessão
+        function getAuthToken() {
+            const sessionData = localStorage.getItem('userSession') || sessionStorage.getItem('userSession');
+            if (sessionData) {
+                try {
+                    const session = JSON.parse(sessionData);
+                    return session.token;
+                } catch (error) {
+                    return null;
+                }
+            }
+            return null;
+        }
+        
+        // Verifica se está logado como admin
+        async function checkAdminAccess() {
+            const token = getAuthToken();
+            if (!token) {
+                window.location.href = '/login.html';
+                return false;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Token inválido');
+                }
+                
+                const data = await response.json();
+                const adminEmails = ['thiagosc31@hotmail.com'];
+                if (!adminEmails.includes(data.data.user.email)) {
+                    alert('Acesso negado. Apenas administradores podem acessar esta página.');
+                    window.location.href = '/dashboard.html';
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Erro ao verificar acesso:', error);
+                window.location.href = '/login.html';
+                return false;
+            }
+        }
+        
+
+        
+        // Logout
+        function sidebarLogout() {
+            if (confirm('Tem certeza que deseja sair?')) {
+                localStorage.removeItem('userSession');
+                sessionStorage.removeItem('userSession');
+                window.location.href = '/login.html';
+            }
+        }
+        
+        // Mostrar formulário de criação
+        function showCreateForm() {
+            document.getElementById('formsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Mostrar/ocultar campo de usuário específico
+        document.getElementById('messageRecipient').addEventListener('change', function() {
+            const specificUserGroup = document.getElementById('specificUserGroup');
+            if (this.value === 'specific') {
+                specificUserGroup.style.display = 'block';
+                document.getElementById('specificUser').required = true;
+            } else {
+                specificUserGroup.style.display = 'none';
+                document.getElementById('specificUser').required = false;
+            }
+        });
+        
+        // Enviar anúncio
+        document.getElementById('announcementForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                title: document.getElementById('announcementTitle').value,
+                content: document.getElementById('announcementContent').value,
+                type: document.getElementById('announcementType').value,
+                priority: document.getElementById('announcementPriority').value
+            };
+            
+            try {
+                const token = getAuthToken();
+                const response = await fetch(`${API_BASE_URL}/announcements`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showMessage(`Anúncio publicado com sucesso! ${data.notifications_sent || 0} notificações enviadas.`, 'success');
+                    document.getElementById('announcementForm').reset();
+                    loadAnnouncements();
+                } else {
+                    showMessage(data.message || 'Erro ao publicar anúncio', 'error');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                showMessage('Erro de conexão. Tente novamente.', 'error');
+            }
+        });
+        
+        // Enviar mensagem
+        document.getElementById('messageForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const recipient = document.getElementById('messageRecipient').value;
+            const formData = {
+                recipient_type: recipient,
+                recipient_id: recipient === 'specific' ? document.getElementById('specificUser').value : null,
+                subject: document.getElementById('messageTitle').value,
+                message: document.getElementById('messageContent').value
+            };
+            
+            try {
+                const token = getAuthToken();
+                const response = await fetch(`${API_BASE_URL}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showMessage(`Mensagem enviada com sucesso! ${data.recipients || 0} destinatários.`, 'success');
+                    document.getElementById('messageForm').reset();
+                    document.getElementById('specificUserGroup').style.display = 'none';
+                    loadAnnouncements();
+                } else {
+                    showMessage(data.message || 'Erro ao enviar mensagem', 'error');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                showMessage('Erro de conexão. Tente novamente.', 'error');
+            }
+        });
+        
+        // Carregar anúncios e mensagens
+        async function loadAnnouncements() {
+            try {
+                const token = getAuthToken();
+                const response = await fetch(`${API_BASE_URL}/communications`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    announcements = data.data || [];
+                    displayAnnouncements(announcements);
+                } else {
+                    throw new Error('Erro ao carregar dados');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                document.getElementById('announcementsList').innerHTML = `
+                    <div class="error">Erro ao carregar comunicações. Verifique sua conexão e tente novamente.</div>
+                `;
+            }
+        }
+        
+        // Exibir anúncios
+        function displayAnnouncements(items) {
+            const container = document.getElementById('announcementsList');
+            
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <h4>📭 Nenhuma comunicação encontrada</h4>
+                        <p>Crie seu primeiro anúncio ou mensagem usando os formulários acima.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = items.map(item => `
+                <div class="announcement-item">
+                    <div class="announcement-header">
+                        <h4 class="announcement-title">${item.title}</h4>
+                        <span class="announcement-type type-${item.type}">
+                            ${getTypeIcon(item.type)} ${getTypeName(item.type)}
+                        </span>
+                    </div>
+                    <div class="announcement-content">${item.content}</div>
+                    <div class="announcement-meta">
+                        <span>📅 ${formatDate(item.created_at)}</span>
+                        <div class="announcement-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="editAnnouncement(${item.id})">
+                                ✏️ Editar
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteAnnouncement(${item.id})">
+                                🗑️ Excluir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Filtrar anúncios
+        function filterAnnouncements() {
+            const filterType = document.getElementById('filterType').value;
+            
+            if (filterType === 'all') {
+                displayAnnouncements(announcements);
+            } else {
+                const filtered = announcements.filter(item => item.type === filterType);
+                displayAnnouncements(filtered);
+            }
+        }
+        
+        // Funções auxiliares
+        function getTypeIcon(type) {
+            const icons = {
+                'announcement': '📢',
+                'message': '✉️',
+                'alert': '⚠️',
+                'maintenance': '🔧',
+                'update': '🆕'
+            };
+            return icons[type] || '📢';
+        }
+        
+        function getTypeName(type) {
+            const names = {
+                'announcement': 'Anúncio',
+                'message': 'Mensagem',
+                'alert': 'Alerta',
+                'maintenance': 'Manutenção',
+                'update': 'Atualização'
+            };
+            return names[type] || 'Comunicação';
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR') + ' às ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        // Editar anúncio
+        async function editAnnouncement(id) {
+            try {
+                const announcement = announcements.find(a => a.id === id);
+                if (!announcement) {
+                    showMessage('Anúncio não encontrado.', 'error');
+                    return;
+                }
+                
+                // Preencher formulário com dados existentes
+                document.getElementById('announcementTitle').value = announcement.title;
+                document.getElementById('announcementContent').value = announcement.content;
+                document.getElementById('announcementType').value = announcement.type;
+                document.getElementById('announcementPriority').value = announcement.priority;
+                
+                // Scroll para o formulário
+                document.getElementById('formsSection').scrollIntoView({ behavior: 'smooth' });
+                
+                showMessage('Dados carregados no formulário. Edite e envie novamente.', 'info');
+            } catch (error) {
+                console.error('Erro ao editar:', error);
+                showMessage('Erro ao carregar dados para edição.', 'error');
+            }
+        }
+        
+        // Excluir anúncio
+        async function deleteAnnouncement(id) {
+            if (!confirm('Tem certeza que deseja excluir esta comunicação?')) {
+                return;
+            }
+            
+            try {
+                const token = getAuthToken();
+                const response = await fetch(`${API_BASE_URL}/announcements/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showMessage('Comunicação excluída com sucesso!', 'success');
+                    loadAnnouncements();
+                } else {
+                    showMessage(data.message || 'Erro ao excluir comunicação', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao excluir:', error);
+                showMessage('Erro de conexão. Tente novamente.', 'error');
+            }
+        }
+        
+        // Mostrar mensagens
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            
+            const container = document.querySelector('.admin-container');
+            container.insertBefore(messageDiv, container.firstChild);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', async function() {
+            const hasAccess = await checkAdminAccess();
+            if (hasAccess) {
+                loadAnnouncements();
+            }
+        });
+    </script>
+</body>
+</html>

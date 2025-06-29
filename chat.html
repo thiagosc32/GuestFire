@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Comunitário - GuestFire</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 900px;
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            position: relative;
+            top: 0;
+            left: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .back-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+
+        .back-btn:hover::before {
+            left: 100%;
+        }
+
+        .back-btn:active {
+            transform: translateY(-1px) scale(1.02);
+            transition: all 0.1s ease;
+        }
+
+        .back-btn .btn-icon {
+            font-size: 16px;
+            font-weight: 900;
+            transition: transform 0.3s ease;
+        }
+
+        .back-btn:hover .btn-icon {
+            transform: translateX(-2px);
+        }
+
+        .chat-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .online-users {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            position: relative;
+        }
+
+        .users-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .users-count:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+
+
+        .users-list-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .users-list-content {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .users-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .users-list-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal-btn:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .user-item:hover {
+            background: #f8fafc;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2ed573 0%, #17a2b8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+
+        .user-status {
+            font-size: 0.8rem;
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chat-private-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .chat-private-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .private-chat-indicator {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin: 10px 20px;
+            text-align: center;
+            border-left: 4px solid #f5576c;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .messages-list {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f8fafc;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            max-width: 75%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.own {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.other {
+            align-self: flex-start;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: bold;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .message.other .message-avatar {
+            background: linear-gradient(135deg, #2ed573 0%, #17a2b8 100%);
+        }
+
+        .message-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .message.own .message-header {
+            flex-direction: row-reverse;
+        }
+
+        .username {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+        }
+
+        .message-content {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .message.own .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .message-input-area {
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 12px 16px;
+            font-size: 14px;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .message-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+
+
+        .welcome-message {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-style: italic;
+            background: #f1f5f9;
+            margin: 0 20px 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .system-message {
+            text-align: center;
+            padding: 8px 16px;
+            margin: 10px 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            font-size: 0.85rem;
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        /* Responsividade para mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+                align-items: stretch;
+            }
+
+            .chat-container {
+                border-radius: 0;
+                height: 100vh;
+                max-height: 100vh;
+                min-height: 100vh;
+                overflow-y: auto;
+            }
+
+            .chat-header {
+                padding: 15px;
+            }
+
+            .chat-title {
+                font-size: 1.3rem;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+
+            .messages-list {
+                padding: 15px;
+            }
+
+            .message-input-area {
+                padding: 15px;
+            }
+
+            .message-avatar {
+                width: 35px;
+                height: 35px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-left">
+                <button class="back-btn" onclick="goToDashboard()">
+                    <span class="btn-icon">←</span>
+                </button>
+                <h1 class="chat-title">Chat Comunitário</h1>
+            </div>
+            <div class="online-users">
+                <span>👥</span>
+                <div class="users-count" id="usersCount" onclick="openUsersModal()">1 online</div>
+            </div>
+        </div>
+
+        <div class="chat-area">
+            <div class="messages-list" id="messagesList">
+                <div class="welcome-message">
+                    🙏 <strong>Bem-vindo ao Chat Comunitário!</strong><br>
+                    Este é um espaço para nossa comunidade se conectar, compartilhar experiências e orar juntos.
+                    Mantenha sempre o respeito e o amor cristão em suas conversas.
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="message-input-area">
+            <div class="input-container">
+                <textarea 
+                    class="message-input" 
+                    id="messageInput" 
+                    placeholder="Digite sua mensagem para a comunidade..."
+                    rows="1"
+                ></textarea>
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                    ➤
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Lista de Usuários -->
+    <div class="users-list-modal" id="usersModal">
+        <div class="users-list-content">
+            <div class="users-list-header">
+                <h3 class="users-list-title">Usuários Online</h3>
+                <button class="close-modal-btn" onclick="closeUsersModal()">×</button>
+            </div>
+            <div id="usersList">
+                <!-- Lista de usuários será gerada dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let messageCount = 0;
+        let currentUser = 'Você';
+        // Sistema de usuários online real
+        let onlineUsers = []; // Esta lista será populada por WebSocket/Socket.IO em uma implementação real
+        let isPrivateChat = false;
+        let privateChatUser = null;
+        let privateChatHistory = {}; // Armazena histórico de chats privados
+        
+        // TODO: Integrar com sistema real de usuários online
+        // Exemplo de como seria com WebSocket:
+        // const socket = io();
+        // socket.on('users-online', (users) => {
+        //     onlineUsers = users.filter(user => user !== currentUser);
+        //     updateUsersCount();
+        // });
+        
+        // Função para voltar ao dashboard
+        function goToDashboard() {
+            window.location.href = 'dashboard.html';
+        }
+
+        // Função para abrir modal de usuários
+        function openUsersModal() {
+            const modal = document.getElementById('usersModal');
+            const usersList = document.getElementById('usersList');
+            
+            // Limpar lista anterior
+            usersList.innerHTML = '';
+            
+            // Verificar se há usuários online além do usuário atual
+             if (onlineUsers.length === 0) {
+                 const noUsersMessage = document.createElement('div');
+                 noUsersMessage.className = 'no-users-message';
+                 noUsersMessage.innerHTML = `
+                     <div style="text-align: center; padding: 20px; color: #64748b;">
+                         <p>📱 <strong>Nenhum outro usuário online no momento</strong></p>
+                         <p>Quando outros membros da comunidade estiverem online, eles aparecerão aqui para você conversar!</p>
+                         <p style="font-size: 0.9rem; margin-top: 15px; opacity: 0.8;">💡 <em>Sistema preparado para integração com WebSocket/Socket.IO</em></p>
+                     </div>
+                 `;
+                 usersList.appendChild(noUsersMessage);
+            } else {
+                // Adicionar usuários online reais
+                onlineUsers.forEach(user => {
+                    const userItem = document.createElement('div');
+                    userItem.className = 'user-item';
+                    userItem.innerHTML = `
+                        <div class="user-info">
+                            <div class="user-avatar">${user.charAt(0).toUpperCase()}</div>
+                            <div class="user-details">
+                                <div class="user-name">${user}</div>
+                                <div class="user-status">🟢 Online</div>
+                            </div>
+                        </div>
+                        <button class="chat-private-btn" onclick="startPrivateChat('${user}')">
+                            Conversar
+                        </button>
+                    `;
+                    usersList.appendChild(userItem);
+                });
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        // Função para fechar modal de usuários
+        function closeUsersModal() {
+            const modal = document.getElementById('usersModal');
+            modal.style.display = 'none';
+        }
+
+        // Função para iniciar chat privado
+        function startPrivateChat(username) {
+            // Salvar histórico do chat atual se estiver em chat privado
+            if (isPrivateChat && privateChatUser) {
+                saveCurrentChatHistory();
+            }
+            
+            isPrivateChat = true;
+            privateChatUser = username;
+            
+            // Atualizar título do chat
+            const chatTitle = document.querySelector('.chat-title');
+            chatTitle.textContent = `Chat com ${username}`;
+            
+            // Adicionar indicador de chat privado
+            const messagesList = document.getElementById('messagesList');
+            messagesList.innerHTML = '';
+            
+            const privateIndicator = document.createElement('div');
+            privateIndicator.className = 'private-chat-indicator';
+            privateIndicator.innerHTML = `
+                💕 <strong>Chat Privado com ${username}</strong><br>
+                Esta é uma conversa privada. Apenas vocês dois podem ver essas mensagens.
+                <button onclick="returnToGroupChat()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 5px; margin-left: 10px; cursor: pointer;">← Voltar ao Chat Geral</button>
+            `;
+            messagesList.appendChild(privateIndicator);
+            
+            // Carregar histórico do chat privado se existir
+            loadPrivateChatHistory(username);
+            
+            // Atualizar placeholder do input
+            const messageInput = document.getElementById('messageInput');
+            messageInput.placeholder = `Digite sua mensagem para ${username}...`;
+            
+            // Fechar modal
+            closeUsersModal();
+            
+
+        }
+
+        // Função para voltar ao chat geral
+        function returnToGroupChat() {
+            // Salvar histórico do chat privado atual
+            if (isPrivateChat && privateChatUser) {
+                saveCurrentChatHistory();
+            }
+            
+            isPrivateChat = false;
+            privateChatUser = null;
+            
+            // Restaurar título do chat
+            const chatTitle = document.querySelector('.chat-title');
+            chatTitle.textContent = 'Chat Comunitário';
+            
+            // Limpar mensagens e restaurar chat geral
+            const messagesList = document.getElementById('messagesList');
+            messagesList.innerHTML = '';
+            
+            const welcomeMessage = document.createElement('div');
+            welcomeMessage.className = 'welcome-message';
+            welcomeMessage.innerHTML = `
+                🙏 <strong>Bem-vindo de volta ao Chat Comunitário!</strong><br>
+                Este é um espaço para nossa comunidade se conectar, compartilhar experiências e orar juntos.
+                Mantenha sempre o respeito e o amor cristão em suas conversas.
+            `;
+            messagesList.appendChild(welcomeMessage);
+            
+            // Restaurar placeholder do input
+            const messageInput = document.getElementById('messageInput');
+            messageInput.placeholder = 'Digite sua mensagem para a comunidade...';
+            
+
+        }
+
+        // Função para salvar histórico do chat atual
+        function saveCurrentChatHistory() {
+            if (!isPrivateChat || !privateChatUser) return;
+            
+            const messagesList = document.getElementById('messagesList');
+            const messages = Array.from(messagesList.children)
+                .filter(el => el.classList.contains('message'))
+                .map(el => el.outerHTML);
+            
+            privateChatHistory[privateChatUser] = messages;
+        }
+
+        // Função para carregar histórico do chat privado
+        function loadPrivateChatHistory(username) {
+            if (privateChatHistory[username]) {
+                const messagesList = document.getElementById('messagesList');
+                privateChatHistory[username].forEach(messageHTML => {
+                    messagesList.insertAdjacentHTML('beforeend', messageHTML);
+                });
+                messagesList.scrollTop = messagesList.scrollHeight;
+            }
+        }
+
+        // Auto-resize do textarea
+        const messageInput = document.getElementById('messageInput');
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            
+            // Habilitar/desabilitar botão de envio
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = this.value.trim() === '';
+        });
+
+        // Enviar mensagem com Enter (Shift+Enter para nova linha)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Função para enviar mensagem
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message === '') return;
+            
+            // Adicionar mensagem do usuário
+            addMessage(message, 'own', currentUser);
+            
+            // Limpar input
+            input.value = '';
+            input.style.height = 'auto';
+            document.getElementById('sendBtn').disabled = true;
+        }
+
+        // Função para adicionar mensagem
+        function addMessage(text, type, username) {
+            const messagesList = document.getElementById('messagesList');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            const avatar = username.charAt(0).toUpperCase();
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content-wrapper">
+                    <div class="message-header">
+                        <span class="username">${username}</span>
+                        <span class="message-time">${timeString}</span>
+                    </div>
+                    <div class="message-content">${text}</div>
+                </div>
+            `;
+            
+            messagesList.appendChild(messageDiv);
+            
+            // Scroll para a última mensagem
+            messagesList.scrollTop = messagesList.scrollHeight;
+            
+            messageCount++;
+        }
+
+
+
+        // Função para adicionar mensagem do sistema
+        function addSystemMessage(text) {
+            const messagesList = document.getElementById('messagesList');
+            const systemDiv = document.createElement('div');
+            systemDiv.className = 'system-message';
+            systemDiv.textContent = text;
+            messagesList.appendChild(systemDiv);
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
+
+
+
+        // Atualizar contador de usuários
+        function updateUsersCount() {
+            const totalUsers = onlineUsers.length + 1; // +1 para incluir o usuário atual
+            document.getElementById('usersCount').textContent = `${totalUsers} online`;
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Focar no input
+            document.getElementById('messageInput').focus();
+            
+            // Desabilitar botão de envio inicialmente
+            document.getElementById('sendBtn').disabled = true;
+            
+            // Adicionar event listener para fechar modal clicando fora
+            const modal = document.getElementById('usersModal');
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeUsersModal();
+                }
+            });
+            
+
+            
+            // Atualizar contador inicial
+            updateUsersCount();
+        });
+
+        // Adicionar suporte para tecla ESC para fechar modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('usersModal');
+                if (modal.style.display === 'flex') {
+                    closeUsersModal();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

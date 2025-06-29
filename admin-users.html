@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Usuários - Painel Administrativo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            color: #555;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-nav a:hover {
+            background: #f8f9fa;
+            border-left-color: #667eea;
+            color: #667eea;
+        }
+
+        .sidebar-nav a.active {
+            background: #f8f9fa;
+            border-left-color: #667eea;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .sidebar-nav a span {
+            margin-right: 12px;
+            font-size: 1.2em;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 0;
+            padding: 30px;
+            width: 100%;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .admin-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .admin-header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .admin-header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        /* Users Section */
+        .users-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-description {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 2.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Search and Controls */
+        .controls-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-box button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* Users Table */
+        .users-table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .users-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .users-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Admin Level Badges */
+        .admin-level-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .admin-level-0 {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .admin-level-1 {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .admin-level-2 {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* Dropdown Actions */
+        .dropdown-actions {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-toggle {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            min-width: 200px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: #f8f9fa;
+        }
+
+        .dropdown-item.btn-danger {
+            color: #dc3545;
+        }
+
+        .dropdown-item.btn-danger:hover {
+            background: #f8d7da;
+        }
+
+        .dropdown-item-icon {
+            margin-right: 8px;
+            font-size: 1.1em;
+        }
+
+        .dropdown-item.disabled {
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .dropdown-item.disabled:hover {
+            background: none;
+        }
+
+        /* Responsive Cards */
+        .users-cards {
+            display: none;
+        }
+
+        .user-card {
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .user-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .user-card-name {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .user-card-email {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .user-card-details {
+            padding: 20px;
+        }
+
+        .user-card-field {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .user-card-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-card-value {
+            text-align: right;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .pagination span {
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* Loading and Error States */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 100px 15px 15px;
+            }
+
+            .admin-header h1 {
+                font-size: 2em;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .controls-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: none;
+            }
+
+            .users-table-container {
+                display: none;
+            }
+
+            .users-cards {
+                display: block;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .stat-card {
+                padding: 20px;
+            }
+
+            .stat-icon {
+                font-size: 2em;
+            }
+
+            .stat-number {
+                font-size: 1.8em;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .back-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+
+        .back-btn:hover::before {
+            left: 100%;
+        }
+
+        .back-btn:active {
+            transform: translateY(-1px) scale(1.02);
+            transition: all 0.1s ease;
+        }
+
+        .back-btn .btn-icon {
+            font-size: 16px;
+            font-weight: 900;
+            transition: transform 0.3s ease;
+        }
+
+        .back-btn:hover .btn-icon {
+            transform: translateX(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="admin-container">
+                <!-- Back Button -->
+                <a href="admin.html" class="back-btn">
+                    <span class="btn-icon">←</span>
+                </a>
+
+                <!-- Header -->
+                <div class="admin-header">
+                    <h1>👥 Gerenciar Usuários</h1>
+                    <p>Administre usuários, permissões e configurações de acesso</p>
+                </div>
+
+                <!-- Users Section -->
+                <div class="users-section">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">
+                                <span>👥</span> Usuários do Sistema
+                            </h2>
+                            <p class="section-description">
+                                Gerencie todos os usuários registrados no sistema, altere permissões e monitore atividades.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- User Statistics -->
+                    <div class="stats-grid" id="userStatsGrid">
+                        <div class="loading">Carregando estatísticas...</div>
+                    </div>
+
+                    <!-- User Growth Chart -->
+                    <div class="chart-container">
+                        <h3 class="chart-title">📈 Crescimento de Usuários (Últimos 30 dias)</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="userGrowthChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="controls-section">
+                        <div class="search-box">
+                            <input type="text" id="userSearch" placeholder="Buscar usuários por nome ou email..." onkeypress="if(event.key==='Enter') searchUsers()">
+                            <button onclick="searchUsers()">🔍</button>
+                        </div>
+                        <button class="btn btn-primary" onclick="loadUsers(1, '')">
+                            <span>🔄</span> Atualizar Lista
+                        </button>
+                    </div>
+
+                    <!-- Users Content -->
+                    <div id="usersContent">
+                        <div class="loading">Carregando usuários...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Detecta automaticamente a URL base para funcionar tanto no localhost quanto na rede
+        // Detecta se estamos usando localtunnel ou localhost
+        const isLocaltunnel = window.location.hostname.includes('.loca.lt');
+        const API_BASE_URL = isLocaltunnel 
+            ? `${window.location.protocol}//${window.location.hostname}/api`
+            : `${window.location.protocol}//${window.location.hostname}:${window.location.port || '3000'}/api`;
+        
+        // Variáveis globais
+        let currentPage = 1;
+        let currentSearch = '';
+        let userGrowthChart = null;
+
+        // Função para obter token de autenticação
+        function getAuthToken() {
+            const sessionData = localStorage.getItem('userSession') || sessionStorage.getItem('userSession');
+            if (sessionData) {
+                try {
+                    const session = JSON.parse(sessionData);
+                    return session.token;
+                } catch (error) {
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        // Função para verificar autenticação
+        function checkAuth() {
+            const token = getAuthToken();
+            if (!token) {
+                alert('Você precisa estar logado para acessar esta página.');
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Sidebar functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            
+            // Verificar se é mobile
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('show');
+            } else {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            }
+            hamburgerBtn.classList.toggle('active');
+        }
+        
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
+            } else {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+            hamburgerBtn.classList.remove('active');
+        }
+
+        // Dropdown functions
+        function toggleDropdown(id) {
+            // Fecha todos os dropdowns abertos
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                if (menu.id !== `dropdown-${id}`) {
+                    menu.classList.remove('show');
+                }
+            });
+            
+            // Alterna o dropdown clicado
+            const dropdown = document.getElementById(`dropdown-${id}`);
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
+
+        // Fecha dropdowns ao clicar fora
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.dropdown-actions')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+
+        // Carrega estatísticas de usuários
+        async function loadUserStats() {
+            const userStatsElement = document.getElementById('userStatsGrid');
+            
+            // Mostra indicador de carregamento
+            userStatsElement.innerHTML = '<div class="loading">🔄 Carregando estatísticas...</div>';
+            
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    throw new Error('Token de autenticação não encontrado');
+                }
+                
+                console.log('Carregando estatísticas de:', `${API_BASE_URL}/users/admin/stats`);
+                
+                const response = await fetch(`${API_BASE_URL}/users/admin/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Stats response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Erro na resposta das estatísticas:', errorText);
+                    throw new Error(`Erro ao carregar estatísticas: ${response.status} - ${errorText}`);
+                }
+                
+                const data = await response.json();
+                const stats = data.data;
+                
+                userStatsElement.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-number">${stats.totalUsers || 0}</div>
+                        <div class="stat-label">Total de Usuários</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-number">${stats.activeUsers || 0}</div>
+                        <div class="stat-label">Usuários Ativos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏸️</div>
+                        <div class="stat-number">${stats.inactiveUsers || 0}</div>
+                        <div class="stat-label">Usuários Inativos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⚙️</div>
+                        <div class="stat-number">${stats.adminUsers || 0}</div>
+                        <div class="stat-label">Administradores</div>
+                    </div>
+                `;
+                
+                // Carrega gráfico de crescimento
+                loadUserGrowthChart(stats.growthData || []);
+                
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas de usuários:', error);
+                const errorMessage = error.message || 'Erro desconhecido ao carregar estatísticas';
+                userStatsElement.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Erro ao carregar estatísticas</h3>
+                        <p><strong>Detalhes:</strong> ${errorMessage}</p>
+                        <p><strong>URL da API:</strong> ${API_BASE_URL}</p>
+                        <button class="btn btn-primary" onclick="loadUserStats()" style="margin-top: 15px;">
+                            🔄 Tentar Novamente
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Carrega gráfico de crescimento de usuários
+        function loadUserGrowthChart(growthData) {
+            const ctx = document.getElementById('userGrowthChart').getContext('2d');
+            
+            // Destroi gráfico anterior se existir
+            if (userGrowthChart) {
+                userGrowthChart.destroy();
+            }
+            
+            // Dados de exemplo se não houver dados reais
+            const defaultData = {
+                labels: ['Há 30 dias', 'Há 25 dias', 'Há 20 dias', 'Há 15 dias', 'Há 10 dias', 'Há 5 dias', 'Hoje'],
+                datasets: [{
+                    label: 'Novos Usuários',
+                    data: [2, 5, 3, 8, 4, 6, 7],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            };
+            
+            const chartData = growthData.length > 0 ? growthData : defaultData;
+            
+            userGrowthChart = new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f0f0f0'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Carrega usuários
+        async function loadUsers(page = 1, search = '') {
+            // Mostra indicador de carregamento
+            document.getElementById('usersContent').innerHTML = '<div class="loading">🔄 Carregando usuários...</div>';
+            
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    throw new Error('Token de autenticação não encontrado');
+                }
+                
+                const url = new URL(`${API_BASE_URL}/users/admin/users`);
+                url.searchParams.append('page', page);
+                url.searchParams.append('limit', '10');
+                if (search) {
+                    url.searchParams.append('search', search);
+                }
+                
+                console.log('Carregando usuários de:', url.toString());
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Erro na resposta:', errorText);
+                    throw new Error(`Erro ao carregar usuários: ${response.status} - ${errorText}`);
+                }
+                
+                const data = await response.json();
+                const users = data.data.users;
+                const pagination = data.data.pagination;
+                
+                currentPage = page;
+                currentSearch = search;
+                
+                let tableHTML = `
+                    <div class="users-table-container">
+                        <table class="users-table">
+                            <thead>
+                                <tr>
+                                    <th>Usuário</th>
+                                    <th>Status</th>
+                                    <th>Admin</th>
+                                    <th>Data</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                let cardsHTML = '<div class="users-cards">';
+                
+                users.forEach(user => {
+                    const createdAt = new Date(user.createdAt).toLocaleDateString('pt-BR');
+                    const statusClass = user.isActive ? 'status-active' : 'status-inactive';
+                    const statusText = user.isActive ? 'Ativo' : 'Inativo';
+                    const toggleText = user.isActive ? 'Desativar' : 'Ativar';
+                    
+                    const adminLevelName = user.adminLevelName || getAdminLevelName(user.adminLevel);
+                    
+                    tableHTML += `
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600;">${user.fullName}</div>
+                                <div style="font-size: 0.8em; color: #666;">${user.email}</div>
+                            </td>
+                            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                            <td>
+                                <span class="admin-level-badge admin-level-${user.adminLevel}">
+                                    ${adminLevelName}
+                                </span>
+                            </td>
+                            <td>${createdAt}</td>
+                            <td>
+                                <div class="dropdown-actions">
+                                    <button class="btn btn-secondary dropdown-toggle" onclick="toggleDropdown(${user.id})">
+                                        ⋮
+                                    </button>
+                                    <div class="dropdown-menu" id="dropdown-${user.id}">
+                                        <button class="dropdown-item view-action" onclick="viewUser(${user.id})">
+                                            <span class="dropdown-item-icon">👁️</span>Visualizar Perfil
+                                        </button>
+                                        ${user.email !== 'thiagosc31@hotmail.com' ? 
+                                            `<button class="dropdown-item toggle-action ${!user.isActive ? '' : 'deactivate'}" onclick="toggleUserStatus(${user.id}, ${!user.isActive})">
+                                                <span class="dropdown-item-icon">${toggleText === 'Ativar' ? '✅' : '⏸️'}</span>${toggleText === 'Ativar' ? 'Ativar Usuário' : 'Desativar Usuário'}
+                                             </button>
+                                             <button class="dropdown-item admin-action" onclick="changeAdminLevel(${user.id})">
+                                                <span class="dropdown-item-icon">⚙️</span>Alterar Nível Admin
+                                             </button>
+                                             <button class="dropdown-item btn-danger" onclick="deleteUser(${user.id})">
+                                                <span class="dropdown-item-icon">🗑️</span><span style="color: white; text-shadow: 1px 1px 1px black;">Excluir Usuário</span>
+                                             </button>` : 
+                                            '<span class="dropdown-item disabled"><span class="dropdown-item-icon">👑</span>Administrador Principal</span>'
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    
+                    // Gerar card responsivo
+                    cardsHTML += `
+                        <div class="user-card">
+                            <div class="user-card-header">
+                                <div class="user-card-info">
+                                    <div class="user-card-name">${user.fullName}</div>
+                                    <div class="user-card-email">${user.email}</div>
+                                </div>
+                                <div class="user-card-actions">
+                                    <div class="dropdown-actions">
+                                        <button class="btn btn-secondary dropdown-toggle" onclick="toggleDropdown('card-${user.id}')">
+                                            ⋮
+                                        </button>
+                                        <div class="dropdown-menu" id="dropdown-card-${user.id}">
+                                            <button class="dropdown-item view-action" onclick="viewUser(${user.id})">
+                                                <span class="dropdown-item-icon">👁️</span>Visualizar Perfil
+                                            </button>
+                                            ${user.email !== 'thiagosc31@hotmail.com' ? 
+                                                `<button class="dropdown-item toggle-action ${!user.isActive ? '' : 'deactivate'}" onclick="toggleUserStatus(${user.id}, ${!user.isActive})">
+                                                    <span class="dropdown-item-icon">${toggleText === 'Ativar' ? '✅' : '⏸️'}</span>${toggleText === 'Ativar' ? 'Ativar Usuário' : 'Desativar Usuário'}
+                                                 </button>
+                                                 <button class="dropdown-item admin-action" onclick="changeAdminLevel(${user.id})">
+                                                    <span class="dropdown-item-icon">⚙️</span>Alterar Nível Admin
+                                                 </button>
+                                                 <button class="dropdown-item btn-danger" onclick="deleteUser(${user.id})">
+                                                     <span class="dropdown-item-icon">🗑️</span><span style="color: white; text-shadow: 1px 1px 1px black;">Excluir Usuário</span>
+                                                  </button>` : 
+                                                '<span class="dropdown-item disabled"><span class="dropdown-item-icon">👑</span>Administrador Principal</span>'
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="user-card-details">
+                                <div class="user-card-field">
+                                    <div class="user-card-label">Status</div>
+                                    <div class="user-card-value">
+                                        <span class="status-badge ${statusClass}">${statusText}</span>
+                                    </div>
+                                </div>
+                                <div class="user-card-field">
+                                    <div class="user-card-label">Nível Admin</div>
+                                    <div class="user-card-value">
+                                        <span class="admin-level-badge admin-level-${user.adminLevel}">
+                                            ${adminLevelName}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="user-card-field">
+                                    <div class="user-card-label">Data de Criação</div>
+                                    <div class="user-card-value">${createdAt}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                tableHTML += '</tbody></table></div>';
+                cardsHTML += '</div>';
+                
+                // Adiciona paginação
+                let paginationHTML = '<div class="pagination">';
+                
+                if (pagination.page > 1) {
+                    paginationHTML += `<button class="btn btn-secondary" onclick="loadUsers(${pagination.page - 1}, '${search}')">Anterior</button>`;
+                }
+                
+                paginationHTML += `<span>Página ${pagination.page} de ${pagination.totalPages} (${pagination.total} usuários)</span>`;
+                
+                if (pagination.page < pagination.totalPages) {
+                    paginationHTML += `<button class="btn btn-secondary" onclick="loadUsers(${pagination.page + 1}, '${search}')">Próxima</button>`;
+                }
+                
+                paginationHTML += '</div>';
+                
+                document.getElementById('usersContent').innerHTML = tableHTML + cardsHTML + paginationHTML;
+                
+            } catch (error) {
+                console.error('Erro ao carregar usuários:', error);
+                const errorMessage = error.message || 'Erro desconhecido ao carregar usuários';
+                document.getElementById('usersContent').innerHTML = `
+                    <div class="error">
+                        <h3>❌ Erro ao carregar usuários</h3>
+                        <p><strong>Detalhes:</strong> ${errorMessage}</p>
+                        <p><strong>URL da API:</strong> ${API_BASE_URL}</p>
+                        <button class="btn btn-primary" onclick="loadUsers(1, '')" style="margin-top: 15px;">
+                            🔄 Tentar Novamente
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Buscar usuários
+        function searchUsers() {
+            const searchTerm = document.getElementById('userSearch').value.trim();
+            loadUsers(1, searchTerm);
+        }
+
+        // Alterna status do usuário
+        async function toggleUserStatus(userId, newStatus) {
+            if (!confirm(`Tem certeza que deseja ${newStatus ? 'ativar' : 'desativar'} este usuário?`)) {
+                return;
+            }
+            
+            try {
+                const token = getAuthToken();
+                const response = await fetch(`${API_BASE_URL}/users/admin/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ isActive: newStatus })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao alterar status');
+                }
+                
+                const data = await response.json();
+                alert(data.message);
+                loadUsers(currentPage, currentSearch);
+                loadUserStats(); // Atualiza estatísticas
+                
+            } catch (error) {
+                console.error('Erro ao alterar status:', error);
+                alert('Erro ao alterar status do usuário');
+            }
+        }
+
+        // Visualiza detalhes do usuário
+        async function viewUser(userId) {
+            try {
+                const token = getAuthToken();
+                const response = await fetch(`${API_BASE_URL}/users/admin/users/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar usuário');
+                }
+                
+                const data = await response.json();
+                const user = data.data.user;
+                const loginHistory = data.data.loginHistory;
+                
+                let historyHTML = '';
+                if (loginHistory.length > 0) {
+                    historyHTML = loginHistory.map(log => {
+                        const date = new Date(log.createdAt).toLocaleString('pt-BR');
+                        const status = log.success ? '✅ Sucesso' : '❌ Falha';
+                        return `${date} - ${status} - IP: ${log.ipAddress || 'N/A'}`;
+                    }).join('\n');
+                } else {
+                    historyHTML = 'Nenhum histórico de login encontrado';
+                }
+                
+                const userInfo = `
+Detalhes do Usuário:
+
+ID: ${user.id}
+Nome: ${user.fullName}
+Email: ${user.email}
+Status: ${user.isActive ? 'Ativo' : 'Inativo'}
+Criado em: ${new Date(user.createdAt).toLocaleString('pt-BR')}
+Última atualização: ${new Date(user.updatedAt).toLocaleString('pt-BR')}
+
+Últimos 10 logins:
+${historyHTML}
+                `;
+                
+                alert(userInfo);
+                
+            } catch (error) {
+                console.error('Erro ao carregar usuário:', error);
+                alert('Erro ao carregar detalhes do usuário');
+            }
+        }
+
+        // Função auxiliar para obter nome do nível de administrador
+        function getAdminLevelName(level) {
+            switch (level) {
+                case 0: return 'Usuário';
+                case 1: return 'Administrador';
+                case 2: return 'Super Admin';
+                default: return 'Desconhecido';
+            }
+        }
+
+        // Alterar nível de administrador
+        async function changeAdminLevel(userId) {
+            try {
+                const token = getAuthToken();
+                
+                // Busca dados do usuário
+                const response = await fetch(`${API_BASE_URL}/users/admin/users/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar usuário');
+                }
+                
+                const data = await response.json();
+                const user = data.data.user;
+                
+                // Busca informações sobre os níveis disponíveis
+                const levelsResponse = await fetch(`${API_BASE_URL}/users/admin/levels`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!levelsResponse.ok) {
+                    throw new Error('Erro ao carregar níveis');
+                }
+                
+                const levelsData = await levelsResponse.json();
+                const levels = levelsData.data.levels;
+                const currentUserLevel = levelsData.data.currentUserLevel;
+                
+                // Verifica se o usuário atual pode alterar níveis (apenas super admin)
+                if (currentUserLevel < 2) {
+                    alert('Apenas Super Administradores podem alterar níveis de acesso.');
+                    return;
+                }
+                
+                // Cria opções para seleção
+                let options = 'Selecione o novo nível de administrador:\n\n';
+                levels.forEach((level, index) => {
+                    options += `${index + 1}. ${level.name} - ${level.description}\n`;
+                });
+                options += '\nDigite o número da opção desejada:';
+                
+                const choice = prompt(options);
+                if (choice === null) return; // Cancelou
+                
+                const selectedIndex = parseInt(choice) - 1;
+                if (selectedIndex < 0 || selectedIndex >= levels.length) {
+                    alert('Opção inválida!');
+                    return;
+                }
+                
+                const newLevel = levels[selectedIndex];
+                
+                // Confirmação
+                if (!confirm(`Alterar nível de "${user.fullName}" para "${newLevel.name}"?\n\nUsuário: ${user.email}\nNível atual: ${user.adminLevelName}\nNovo nível: ${newLevel.name}`)) {
+                    return;
+                }
+                
+                // Envia alteração
+                const updateResponse = await fetch(`${API_BASE_URL}/users/admin/users/${userId}/admin-level`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        adminLevel: newLevel.value
+                    })
+                });
+                
+                const updateResult = await updateResponse.json();
+                
+                if (updateResponse.ok) {
+                    alert(updateResult.message);
+                    loadUsers(currentPage, currentSearch);
+                    loadUserStats();
+                } else {
+                    alert(updateResult.message || 'Erro ao alterar nível de administrador');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao alterar nível de administrador:', error);
+                alert('Erro ao alterar nível de administrador');
+            }
+        }
+
+        // Deletar usuário
+        async function deleteUser(userId) {
+            try {
+                const token = getAuthToken();
+                
+                // Busca dados do usuário para confirmação
+                const response = await fetch(`${API_BASE_URL}/users/admin/users/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar usuário');
+                }
+                
+                const data = await response.json();
+                const user = data.data.user;
+                
+                if (!confirm(`Tem certeza que deseja DELETAR permanentemente o usuário:\n\nNome: ${user.fullName}\nEmail: ${user.email}\n\nEsta ação não pode ser desfeita!`)) {
+                    return;
+                }
+                
+                // Confirma novamente
+                if (!confirm('ATENÇÃO: Esta ação é IRREVERSÍVEL!\n\nDigite "DELETAR" para confirmar:')) {
+                    return;
+                }
+                
+                // Deleta o usuário
+                const deleteResponse = await fetch(`${API_BASE_URL}/users/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const deleteResult = await deleteResponse.json();
+                
+                if (deleteResponse.ok) {
+                    alert(deleteResult.message);
+                    loadUsers(currentPage, currentSearch);
+                    loadUserStats();
+                } else {
+                    alert(deleteResult.message || 'Erro ao deletar usuário');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao deletar usuário:', error);
+                alert('Erro ao deletar usuário');
+            }
+        }
+
+
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAuth()) {
+                return;
+            }
+            
+            loadUserStats();
+            loadUsers();
+        });
+    </script>
+</body>
+</html>

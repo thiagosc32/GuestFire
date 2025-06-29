@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suporte - GuestFire</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .messages-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .messages-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            overflow: hidden;
+            min-width: 40px;
+            justify-content: center;
+        }
+
+        .back-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .back-btn:active {
+            transform: translateY(0);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .back-btn .btn-icon {
+            font-size: 16px;
+            font-weight: 900;
+            transition: transform 0.3s ease;
+        }
+
+        .back-btn:hover .btn-icon {
+            transform: translateX(-2px);
+        }
+
+        .messages-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .online-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .messages-list {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            max-width: 70%;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.received {
+            align-self: flex-start;
+        }
+
+        .message-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            background: #f1f5f9;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.sent .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .message.sent .message-time {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .message-input-area {
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 12px 16px;
+            font-size: 14px;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .message-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #64748b;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #64748b;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .empty-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Responsividade para mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+                align-items: stretch;
+            }
+
+            .messages-container {
+                border-radius: 0;
+                height: 100vh;
+                max-height: 100vh;
+                min-height: 100vh;
+                overflow-y: auto;
+            }
+
+            .messages-header {
+                padding: 15px;
+            }
+
+            .messages-title {
+                font-size: 1.3rem;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+
+            .messages-list {
+                padding: 15px;
+            }
+
+            .message-input-area {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="messages-container">
+        <div class="messages-header">
+            <div class="header-left">
+                <button class="back-btn" onclick="goToDashboard()">
+                    <span class="btn-icon">←</span>
+                </button>
+                <h1 class="messages-title">Precisando conversar?</h1>
+            </div>
+            <div class="online-status">
+                <div class="status-dot"></div>
+                Online
+            </div>
+        </div>
+
+        <div class="chat-area">
+            <div class="messages-list" id="messagesList">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">💬</div>
+                    <div class="empty-title">Converse Conosco</div>
+                    <div class="empty-description">Converse conosco, a equipe do Guest Fire está a sua disposição para te ajudar</div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="message-avatar">A</div>
+                <span>Admin está digitando</span>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="message-input-area">
+            <div class="input-container">
+                <textarea 
+                    class="message-input" 
+                    id="messageInput" 
+                    placeholder="Digite sua mensagem..."
+                    rows="1"
+                ></textarea>
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                    ➤
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let messageCount = 0;
+
+        // Função para voltar ao dashboard
+        function goToDashboard() {
+            window.location.href = 'dashboard.html';
+        }
+
+        // Auto-resize do textarea
+        const messageInput = document.getElementById('messageInput');
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            
+            // Habilitar/desabilitar botão de envio
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = this.value.trim() === '';
+        });
+
+        // Enviar mensagem com Enter (Shift+Enter para nova linha)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Função para enviar mensagem
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message === '') return;
+            
+            // Adicionar mensagem do usuário
+            addMessage(message, 'sent', 'Você');
+            
+            // Limpar input
+            input.value = '';
+            input.style.height = 'auto';
+            document.getElementById('sendBtn').disabled = true;
+            
+            // Simular resposta automática após um delay
+            setTimeout(() => {
+                showTypingIndicator();
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    addAutoReply(message);
+                }, 2000);
+            }, 500);
+        }
+
+        // Função para adicionar mensagem
+        function addMessage(text, type, sender) {
+            const messagesList = document.getElementById('messagesList');
+            const emptyState = document.getElementById('emptyState');
+            
+            // Esconder estado vazio
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            const avatar = type === 'sent' ? 'V' : 'A';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div>
+                    <div class="message-content">${text}</div>
+                    <div class="message-time">${timeString}</div>
+                </div>
+            `;
+            
+            messagesList.appendChild(messageDiv);
+            
+            // Scroll para a última mensagem
+            messagesList.scrollTop = messagesList.scrollHeight;
+            
+            messageCount++;
+        }
+
+        // Função para mostrar indicador de digitação
+        function showTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            typingIndicator.style.display = 'flex';
+            
+            const messagesList = document.getElementById('messagesList');
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
+
+        // Função para esconder indicador de digitação
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            typingIndicator.style.display = 'none';
+        }
+
+        // Função para resposta automática
+        function addAutoReply(userMessage) {
+            const replies = [
+                "Obrigado pela sua mensagem! Nossa equipe irá analisá-la em breve.",
+                "Recebemos sua mensagem. Retornaremos o contato em até 24 horas.",
+                "Sua mensagem é importante para nós. Aguarde nosso retorno!",
+                "Mensagem recebida com sucesso. Nossa equipe está analisando.",
+                "Agradecemos o contato! Em breve você receberá uma resposta."
+            ];
+            
+            // Respostas específicas para certas palavras-chave
+            const lowerMessage = userMessage.toLowerCase();
+            let reply;
+            
+            if (lowerMessage.includes('oração') || lowerMessage.includes('orar')) {
+                reply = "Que bênção saber que você quer orar! Nossa comunidade está sempre unida em oração. 🙏";
+            } else if (lowerMessage.includes('ajuda') || lowerMessage.includes('problema')) {
+                reply = "Estamos aqui para ajudar! Nossa equipe de suporte analisará sua solicitação e retornará em breve.";
+            } else if (lowerMessage.includes('obrigad') || lowerMessage.includes('valeu')) {
+                reply = "De nada! É sempre um prazer ajudar nossa comunidade. Que Deus te abençoe! ✨";
+            } else {
+                reply = replies[Math.floor(Math.random() * replies.length)];
+            }
+            
+            addMessage(reply, 'received', 'Admin');
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Focar no input
+            document.getElementById('messageInput').focus();
+            
+            // Desabilitar botão de envio inicialmente
+            document.getElementById('sendBtn').disabled = true;
+            
+            // Adicionar mensagem de boas-vindas após um pequeno delay
+            setTimeout(() => {
+                addMessage(
+                    "Olá! Bem-vindo ao suporte do GuestFire. Como posso ajudá-lo hoje? 😊",
+                    'received',
+                    'Admin'
+                );
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
