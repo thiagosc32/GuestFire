@@ -71,9 +71,7 @@ npm run iniciar:docker
    - Abra o arquivo `index.html` em qualquer navegador web moderno
    - Ou use um servidor local para melhor experiência
 
-2. **Credenciais de Teste**:
-   - **Email**: `thiagosc31@hotmail.com`
-   - **Senha**: `Janeiro312002`
+
 
 3. **Funcionalidades Disponíveis**:
    - **Login**: Validação de email e senha
