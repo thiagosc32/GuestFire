@@ -2,22 +2,32 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 
-// Cria o diretório database se não existir
-const dbDir = path.join(__dirname, '..', 'database');
-if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true });
+function initializeDatabase() {
+    return new Promise((resolve, reject) => {
+        // Cria o diretório database se não existir
+        const dbDir = path.join(__dirname, '..', 'database');
+        if (!fs.existsSync(dbDir)) {
+            fs.mkdirSync(dbDir, { recursive: true });
+        }
+
+        const dbPath = path.join(dbDir, 'users.db');
+
+        // Conecta ao banco de dados
+        const db = new sqlite3.Database(dbPath, (err) => {
+            if (err) {
+                console.error('Erro ao conectar com o banco de dados:', err.message);
+                reject(err);
+                return;
+            }
+            console.log('✅ Conectado ao banco de dados SQLite.');
+            
+            // Continue com a inicialização...
+            initializeTables(db, resolve, reject);
+        });
+    });
 }
 
-const dbPath = path.join(dbDir, 'users.db');
-
-// Conecta ao banco de dados
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error('Erro ao conectar com o banco de dados:', err.message);
-        return;
-    }
-    console.log('✅ Conectado ao banco de dados SQLite.');
-});
+function initializeTables(db, resolve, reject) {
 
 // Cria a tabela de usuários
 const createUsersTable = `
@@ -310,14 +320,25 @@ db.serialize(() => {
             db.close((err) => {
                 if (err) {
                     console.error('❌ Erro ao fechar o banco de dados:', err.message);
+                    reject(err);
                 } else {
                     console.log('✅ Conexão com o banco de dados fechada.');
                     console.log('\n🎉 Banco de dados inicializado com sucesso!');
                     console.log('\n📋 Credenciais padrão:');
                     console.log('   Email: thiagosc31@hotmail.com');
                     console.log('   Senha: Janeiro312002');
+                    resolve();
                 }
             });
         });
     }
 });
+}
+
+// Exporta a função para uso como módulo
+module.exports = initializeDatabase;
+
+// Se executado diretamente, inicializa o banco
+if (require.main === module) {
+    initializeDatabase().catch(console.error);
+}

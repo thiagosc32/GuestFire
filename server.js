@@ -10,6 +10,9 @@ const passport = require('passport');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
+// Inicializar banco de dados
+const initDatabase = require('./scripts/init-database');
+
 // Configurar Passport
 require('./config/passport');
 const authRoutes = require('./routes/auth');
@@ -44,7 +47,8 @@ app.use(cors({
         // Permite qualquer IP da rede local 192.168.1.x e domínios do Render
         if (!origin || allowedOrigins.includes(origin) || 
             (origin && origin.match(/^http:\/\/192\.168\.1\.\d+:3000$/)) ||
-            (origin && origin.match(/^https:\/\/.*\.onrender\.com$/))) {
+            (origin && origin.match(/^https:\/\/.*\.onrender\.com$/)) ||
+            origin === 'https://guestfire.onrender.com') {
             callback(null, true);
         } else {
             callback(new Error('Não permitido pelo CORS'));
@@ -62,7 +66,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // true apenas em HTTPS
+    secure: process.env.NODE_ENV === 'production', // true em produção (HTTPS)
     maxAge: 24 * 60 * 60 * 1000 // 24 horas
   }
 }));
@@ -1771,15 +1775,23 @@ app.use('*', (req, res) => {
     });
 });
 
-// Inicia o servidor
-app.listen(PORT, '0.0.0.0', () => {
-    console.log('🚀 Servidor iniciado com sucesso!');
-    console.log(`📡 Acesso Local: http://localhost:${PORT}`);
-    console.log(`🌐 Acesso Rede: http://192.168.1.69:${PORT}`);
-    console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
-    console.log('\n📋 Rotas disponíveis:');
-    console.log('   GET  /                    - Página de login');
-    console.log('   GET  /register            - Página de cadastro');
+// Função para inicializar o servidor
+async function startServer() {
+    try {
+        // Inicializa o banco de dados primeiro
+        console.log('🔄 Inicializando banco de dados...');
+        await initDatabase();
+        console.log('✅ Banco de dados inicializado!');
+        
+        // Inicia o servidor após a inicialização do banco
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log('🚀 Servidor iniciado com sucesso!');
+            console.log(`📡 Acesso Local: http://localhost:${PORT}`);
+            console.log(`🌐 Acesso Rede: http://192.168.1.69:${PORT}`);
+            console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
+            console.log('\n📋 Rotas disponíveis:');
+            console.log('   GET  /                    - Página de login');
+            console.log('   GET  /register            - Página de cadastro');
     console.log('   GET  /dashboard           - Dashboard');
     console.log('   POST /api/auth/register   - Cadastrar usuário');
     console.log('   POST /api/auth/login      - Fazer login');
@@ -1789,7 +1801,15 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log('\n💡 Para inicializar o banco de dados, execute:');
     console.log('   npm run init-db');
     console.log('\n🔥 Servidor acessível pela rede local!');
-});
+        });
+    } catch (error) {
+        console.error('❌ Erro ao inicializar o servidor:', error);
+        process.exit(1);
+    }
+}
+
+// Inicia o servidor
+startServer();
 
 // Tratamento de erros não capturados
 process.on('uncaughtException', (err) => {
