@@ -1,8 +1,9 @@
 // Configurações
 // Detecta automaticamente a URL base para funcionar tanto no localhost quanto na rede
-// Detecta se estamos usando localtunnel ou localhost
+// Detecta se estamos usando localtunnel, Render ou localhost
 const isLocaltunnel = window.location.hostname.includes('.loca.lt');
-const API_BASE_URL = isLocaltunnel 
+const isRender = window.location.hostname.includes('.onrender.com');
+const API_BASE_URL = (isLocaltunnel || isRender)
     ? `${window.location.protocol}//${window.location.hostname}/api`
     : `${window.location.protocol}//${window.location.hostname}:${window.location.port || '3000'}/api`;
 
