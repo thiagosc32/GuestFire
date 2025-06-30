@@ -8,6 +8,12 @@ const fs = require('fs');
 const session = require('express-session');
 const passport = require('passport');
 const nodemailer = require('nodemailer');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const winston = require('winston');
+const joi = require('joi');
+const compression = require('compression');
+const morgan = require('morgan');
 require('dotenv').config();
 const initDatabase = require('./scripts/init-database');
 
@@ -19,6 +25,58 @@ require('./config/passport');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const syncRoutes = require('./routes/sync');
+
+// Configurar Winston Logger
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  defaultMeta: { service: 'guestfire-api' },
+  transports: [
+    new winston.transports.File({ 
+      filename: process.env.LOG_FILE_PATH || 'logs/error.log', 
+      level: 'error' 
+    }),
+    new winston.transports.File({ 
+      filename: process.env.LOG_FILE_PATH || 'logs/combined.log' 
+    })
+  ]
+});
+
+// Em desenvolvimento, também log no console
+if (process.env.NODE_ENV !== 'production') {
+  logger.add(new winston.transports.Console({
+    format: winston.format.simple()
+  }));
+}
+
+// Configurar Rate Limiting
+const generalLimiter = rateLimit({
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutos
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // máximo 100 requests por IP
+  message: {
+    error: 'Muitas requisições deste IP, tente novamente em alguns minutos.',
+    retryAfter: Math.ceil((parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000) / 1000)
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Rate limiting específico para login
+const loginLimiter = rateLimit({
+  windowMs: parseInt(process.env.LOGIN_RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutos
+  max: parseInt(process.env.LOGIN_RATE_LIMIT_MAX_ATTEMPTS) || 5, // máximo 5 tentativas de login
+  message: {
+    error: 'Muitas tentativas de login. Tente novamente em 15 minutos.',
+    retryAfter: Math.ceil((parseInt(process.env.LOGIN_RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000) / 1000)
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,6 +93,34 @@ const transporter = nodemailer.createTransport({
 });
 
 // Middlewares
+// Segurança com Helmet
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      connectSrc: ["'self'"]
+    }
+  },
+  crossOriginEmbedderPolicy: false
+}));
+
+// Compressão de resposta
+app.use(compression());
+
+// Rate limiting geral
+app.use(generalLimiter);
+
+// Logging de requisições HTTP
+app.use(morgan('combined', {
+  stream: {
+    write: (message) => logger.info(message.trim())
+  }
+}));
+
 app.use(cors({
     origin: function (origin, callback) {
         // Permite requisições sem origem (arquivos locais), localhost e rede local
@@ -83,10 +169,40 @@ app.use(express.static(path.join(__dirname)));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Middleware de log
+// Middleware de tratamento de erros
+app.use((err, req, res, next) => {
+  logger.error('Erro na aplicação:', {
+    error: err.message,
+    stack: err.stack,
+    url: req.url,
+    method: req.method,
+    ip: req.ip,
+    userAgent: req.get('User-Agent')
+  });
+  
+  // Não expor detalhes do erro em produção
+  const message = process.env.NODE_ENV === 'production' 
+    ? 'Erro interno do servidor' 
+    : err.message;
+    
+  res.status(err.status || 500).json({
+    success: false,
+    message: message
+  });
+});
+
+// Middleware para requisições não encontradas
 app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-    next();
+  logger.warn('Rota não encontrada:', {
+    url: req.url,
+    method: req.method,
+    ip: req.ip
+  });
+  
+  res.status(404).json({
+    success: false,
+    message: 'Rota não encontrada'
+  });
 });
 
 // Endpoint para testar envio de e-mail
@@ -127,6 +243,8 @@ app.get('/test-email', async (req, res) => {
 });
 
 // Rotas da API
+// Aplicar rate limiting específico para login
+app.use('/api/auth/login', loginLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/sync', syncRoutes);
