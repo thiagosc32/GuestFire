@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - Sistema de Oração</title>
+    <link rel="icon" type="image/png" href="favicon-32x32.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .profile-container {
+            background: white;
+            padding: 2rem;
+            width: 100%;
+            max-width: 800px;
+            position: relative;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #f1f3f4;
+        }
+
+        .profile-photo-container {
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .profile-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #667eea;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-photo-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            border: 3px solid #667eea;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-header h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .back-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+
+        .back-btn:hover::before {
+            left: 100%;
+        }
+
+        .back-btn:active {
+            transform: translateY(-1px) scale(1.02);
+            transition: all 0.1s ease;
+        }
+
+        .back-btn .btn-icon {
+            font-size: 16px;
+            font-weight: 900;
+            transition: transform 0.3s ease;
+        }
+
+        .back-btn:hover .btn-icon {
+            transform: translateX(-2px);
+        }
+
+        .profile-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .profile-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .profile-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .info-value {
+            color: #6c757d;
+            text-align: right;
+        }
+
+        .actions-section {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #c3e6cb;
+        }
+
+        .loading {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-help {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        #edit-section {
+            border-left: 4px solid #28a745;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+                align-items: stretch;
+            }
+
+            .profile-content {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .profile-container {
+                padding: 1.5rem;
+                margin: 0;
+                min-height: 100vh;
+                max-height: 100vh;
+                overflow-y: auto;
+            }
+
+            .actions-section {
+                flex-direction: column;
+            }
+
+            .back-btn {
+                position: static;
+                margin-bottom: 1rem;
+                align-self: flex-start;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <button class="back-btn" onclick="goBack()">
+            <span class="btn-icon">←</span>
+        </button>
+        
+        <div class="profile-header">
+            <div class="profile-photo-container">
+                <img id="profile-photo" src="" alt="Foto do usuário" class="profile-photo" style="display: none;">
+                <div id="profile-photo-placeholder" class="profile-photo-placeholder">👤</div>
+            </div>
+            <h1>Meu Perfil</h1>
+            <p>Informações da sua conta</p>
+        </div>
+
+        <div id="error-message" style="display: none;"></div>
+        
+        <div class="profile-content">
+            <div class="profile-section">
+                <h3>📋 Informações Pessoais</h3>
+                <div class="info-item">
+                    <span class="info-label">Nome:</span>
+                    <span class="info-value" id="profile-name">Carregando...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value" id="profile-email">Carregando...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Data de Cadastro:</span>
+                    <span class="info-value" id="profile-created">Carregando...</span>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <h3>📊 Estatísticas</h3>
+                <div class="info-item">
+                    <span class="info-label">Último Login:</span>
+                    <span class="info-value" id="profile-last-login">Carregando...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Total de Pedidos:</span>
+                    <span class="info-value" id="profile-prayer-count">Carregando...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status da Conta:</span>
+                    <span class="info-value" id="profile-status">Ativa</span>
+                </div>
+            </div>
+
+            <div class="profile-section" id="edit-section" style="display: none; grid-column: 1 / -1;">
+                <h3>✏️ Editar Perfil</h3>
+                <form id="edit-profile-form">
+                    <div class="form-group">
+                        <label for="edit-name">Nome:</label>
+                        <input type="text" id="edit-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-email">Email:</label>
+                        <input type="email" id="edit-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-photo">Foto (opcional):</label>
+                        <input type="file" id="edit-photo" name="photo" accept="image/*">
+                        <small class="form-help">Formatos aceitos: JPG, PNG, GIF (máx. 2MB)</small>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">💾 Salvar Alterações</button>
+                        <button type="button" class="btn btn-secondary" onclick="cancelEdit()">❌ Cancelar</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="actions-section">
+                <button class="btn btn-primary" id="edit-profile-btn" onclick="toggleEditMode()">✏️ Editar Perfil</button>
+                <button class="btn btn-primary" onclick="goToChangePassword()">🔒 Trocar Senha</button>
+                <button class="btn btn-secondary" onclick="goToDashboard()">🏠 Dashboard</button>
+                <button class="btn btn-secondary" onclick="goToMyOrders()">📋 Meus Pedidos</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Função para obter token de autenticação
+        function getAuthToken() {
+            // Primeiro tenta localStorage (remember me)
+            let sessionData = localStorage.getItem('userSession');
+            
+            // Se não encontrar, tenta sessionStorage
+            if (!sessionData) {
+                sessionData = sessionStorage.getItem('userSession');
+            }
+            
+            // Se ainda não encontrar, tenta o token direto (compatibilidade)
+            if (!sessionData) {
+                return localStorage.getItem('token');
+            }
+            
+            try {
+                const session = JSON.parse(sessionData);
+                return session.token;
+            } catch (error) {
+                console.error('Erro ao parsear sessão:', error);
+                // Remove sessão inválida
+                localStorage.removeItem('userSession');
+                sessionStorage.removeItem('userSession');
+                return null;
+            }
+        }
+
+        // Verificar autenticação
+        function checkAuth() {
+            const token = getAuthToken();
+            if (!token) {
+                window.location.href = '/login.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Carregar informações do perfil
+        async function loadProfileInfo() {
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                const response = await fetch('/api/users/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const user = result.data.user;
+                    
+                    document.getElementById('profile-name').textContent = user.fullName || 'Não informado';
+                    document.getElementById('profile-email').textContent = user.email || 'Não informado';
+                    
+                    // Carregar foto do usuário
+                    const profilePhoto = document.getElementById('profile-photo');
+                    const profilePlaceholder = document.getElementById('profile-photo-placeholder');
+                    
+                    if (user.profilePicture) {
+                        profilePhoto.src = user.profilePicture;
+                        profilePhoto.setAttribute('data-original-src', user.profilePicture);
+                        profilePhoto.style.display = 'block';
+                        profilePlaceholder.style.display = 'none';
+                    } else {
+                        profilePhoto.setAttribute('data-original-src', '');
+                        profilePhoto.style.display = 'none';
+                        profilePlaceholder.style.display = 'flex';
+                    }
+                    
+                    // Formatar data de cadastro
+                    const createdDate = new Date(user.createdAt);
+                    document.getElementById('profile-created').textContent = createdDate.toLocaleDateString('pt-BR');
+                    
+                    // Formatar último login
+                    const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('pt-BR') + ' às ' + new Date(user.lastLogin).toLocaleTimeString('pt-BR') : 'Nunca';
+                    document.getElementById('profile-last-login').textContent = lastLogin;
+                    
+                    // Total de pedidos (assumindo que virá em uma futura implementação)
+                    document.getElementById('profile-prayer-count').textContent = user.prayerCount || '0';
+                } else {
+                    showError('Erro ao carregar informações do perfil');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                showError('Erro ao carregar informações do perfil');
+            }
+        }
+
+        // Funções de navegação
+        function goBack() {
+            window.history.back();
+        }
+
+        function goToDashboard() {
+            window.location.href = '/dashboard.html';
+        }
+
+        function goToMyOrders() {
+            window.location.href = '/meus-pedidos.html';
+        }
+
+        function goToChangePassword() {
+            window.location.href = '/dashboard.html#change-password';
+        }
+
+        // Funções de utilidade
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.className = 'success-message';
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Controlar modo de edição
+        function toggleEditMode() {
+            const editSection = document.getElementById('edit-section');
+            const editBtn = document.getElementById('edit-profile-btn');
+            
+            if (editSection.style.display === 'none') {
+                // Preencher campos com dados atuais
+                document.getElementById('edit-name').value = document.getElementById('profile-name').textContent;
+                document.getElementById('edit-email').value = document.getElementById('profile-email').textContent;
+                
+                editSection.style.display = 'block';
+                editBtn.textContent = '👁️ Visualizar Perfil';
+            } else {
+                editSection.style.display = 'none';
+                editBtn.textContent = '✏️ Editar Perfil';
+            }
+        }
+
+        function cancelEdit() {
+            const editSection = document.getElementById('edit-section');
+            const editBtn = document.getElementById('edit-profile-btn');
+            
+            editSection.style.display = 'none';
+            editBtn.textContent = '✏️ Editar Perfil';
+            
+            // Limpar formulário
+            document.getElementById('edit-profile-form').reset();
+            
+            // Restaurar foto original
+            const profilePhoto = document.getElementById('profile-photo');
+            const profilePlaceholder = document.getElementById('profile-photo-placeholder');
+            const originalSrc = profilePhoto.getAttribute('data-original-src');
+            
+            if (originalSrc && originalSrc !== '') {
+                profilePhoto.src = originalSrc;
+                profilePhoto.style.display = 'block';
+                profilePlaceholder.style.display = 'none';
+            } else {
+                profilePhoto.style.display = 'none';
+                profilePlaceholder.style.display = 'flex';
+            }
+        }
+
+        // Salvar alterações do perfil
+        async function saveProfileChanges(event) {
+            event.preventDefault();
+            
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                const fullName = document.getElementById('edit-name').value;
+                const email = document.getElementById('edit-email').value;
+                const photoFile = document.getElementById('edit-photo').files[0];
+                
+                let profileResult = null;
+                let photoResult = null;
+
+                // Atualizar dados do perfil (nome e email) se fornecidos
+                if (fullName || email) {
+                    const profileData = {};
+                    if (fullName) profileData.fullName = fullName;
+                    if (email) profileData.email = email;
+
+                    const profileResponse = await fetch('/api/users/profile', {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(profileData)
+                    });
+
+                    if (profileResponse.ok) {
+                        profileResult = await profileResponse.json();
+                    } else {
+                        const error = await profileResponse.json();
+                        showError(error.message || 'Erro ao atualizar perfil');
+                        return;
+                    }
+                }
+                
+                // Fazer upload da foto se fornecida
+                if (photoFile) {
+                    // Verificar tamanho do arquivo (máx. 2MB)
+                    if (photoFile.size > 2 * 1024 * 1024) {
+                        showError('A foto deve ter no máximo 2MB');
+                        return;
+                    }
+                    
+                    const photoFormData = new FormData();
+                    photoFormData.append('profilePicture', photoFile);
+
+                    const photoResponse = await fetch('/api/users/upload-profile-picture', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: photoFormData
+                    });
+
+                    if (photoResponse.ok) {
+                        photoResult = await photoResponse.json();
+                    } else {
+                        const error = await photoResponse.json();
+                        showError(error.message || 'Erro ao fazer upload da foto');
+                        return;
+                    }
+                }
+
+                // Sucesso - atualizar interface
+                showSuccess('Perfil atualizado com sucesso!');
+                
+                // Atualizar dados na tela
+                if (profileResult) {
+                    document.getElementById('profile-name').textContent = profileResult.data.user.fullName;
+                    document.getElementById('profile-email').textContent = profileResult.data.user.email;
+                }
+                
+                // Atualizar foto do perfil no cabeçalho
+                const profilePhoto = document.getElementById('profile-photo');
+                const profilePlaceholder = document.getElementById('profile-photo-placeholder');
+                
+                if (photoResult && photoResult.data.profilePicture) {
+                    profilePhoto.src = photoResult.data.profilePicture;
+                    profilePhoto.setAttribute('data-original-src', photoResult.data.profilePicture);
+                    profilePhoto.style.display = 'block';
+                    profilePlaceholder.style.display = 'none';
+                }
+                
+                // Fechar modo de edição
+                cancelEdit();
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                showError('Erro ao atualizar perfil');
+            }
+        }
+
+        // Função para preview da foto selecionada
+        function previewPhoto(event) {
+            const file = event.target.files[0];
+            const profilePhoto = document.getElementById('profile-photo');
+            const profilePlaceholder = document.getElementById('profile-photo-placeholder');
+            
+            if (file) {
+                // Verificar se é uma imagem
+                if (!file.type.startsWith('image/')) {
+                    showError('Por favor, selecione apenas arquivos de imagem');
+                    event.target.value = '';
+                    return;
+                }
+                
+                // Verificar tamanho do arquivo (máx. 2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    showError('A foto deve ter no máximo 2MB');
+                    event.target.value = '';
+                    return;
+                }
+                
+                // Criar URL temporária para preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    profilePhoto.src = e.target.result;
+                    profilePhoto.style.display = 'block';
+                    profilePlaceholder.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            if (checkAuth()) {
+                loadProfileInfo();
+                
+                // Adicionar event listener ao formulário
+                document.getElementById('edit-profile-form').addEventListener('submit', saveProfileChanges);
+                
+                // Adicionar event listener ao campo de foto
+                document.getElementById('edit-photo').addEventListener('change', previewPhoto);
+            }
+        });
+    </script>
+</body>
+</html>

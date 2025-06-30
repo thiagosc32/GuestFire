@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes dos Pedidos de Oração - Admin</title>
+    <link rel="icon" type="image/png" href="favicon-32x32.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-content h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header-content .subtitle {
+            font-size: 1.1rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .back-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .status-info {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .status-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .status-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .status-count {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+
+        .status-description {
+            font-size: 1.1rem;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .filters {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters h3 {
+            margin-bottom: 20px;
+            color: #1e293b;
+            font-size: 1.3rem;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: fit-content;
+        }
+
+        .filter-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .prayers-list {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .prayers-list h3 {
+            margin-bottom: 25px;
+            color: #1e293b;
+            font-size: 1.5rem;
+        }
+
+        .prayer-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .prayer-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .prayer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .prayer-user {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 1.1rem;
+        }
+
+        .prayer-date {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .prayer-content {
+            color: #374151;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .prayer-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-button.view {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .action-button.edit {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .action-button.delete {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .action-button.praying {
+            background: #f3e8ff;
+            color: #7c2d12;
+        }
+
+        .action-button.answered {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .action-button.testimony {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .action-button:hover {
+            transform: translateY(-1px);
+            opacity: 0.8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 50px;
+            color: #64748b;
+        }
+
+        .no-data-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Status específico cores */
+        .status-active {
+            background: linear-gradient(145deg, #f0f4ff 0%, #e0e7ff 100%);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .status-active .status-count {
+            color: #3730a3;
+        }
+
+        .status-praying {
+            background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%);
+            border-color: rgba(33, 150, 243, 0.3);
+        }
+
+        .status-praying .status-count {
+            color: #1565c0;
+        }
+
+        .status-answered {
+            background: linear-gradient(145deg, #f0fdf4 0%, #dcfce7 100%);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .status-answered .status-count {
+            color: #166534;
+        }
+
+        .status-cancelled {
+            background: linear-gradient(145deg, #fef2f2 0%, #fee2e2 100%);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .status-cancelled .status-count {
+            color: #991b1b;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                padding: 20px;
+                text-align: center;
+            }
+
+            .header-content h1 {
+                font-size: 2rem;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .prayer-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .prayer-actions {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1 id="pageTitle">Detalhes dos Pedidos</h1>
+                <div class="subtitle" id="pageSubtitle">Visualize e gerencie os pedidos de oração</div>
+            </div>
+            <a href="admin.html" class="back-button">
+                ← Voltar ao Dashboard
+            </a>
+        </div>
+
+        <div class="status-info" id="statusInfo">
+            <div class="status-icon" id="statusIcon">📋</div>
+            <div class="status-title" id="statusTitle">Carregando...</div>
+            <div class="status-count" id="statusCount">-</div>
+            <div class="status-description" id="statusDescription">Aguarde enquanto carregamos as informações...</div>
+        </div>
+
+        <div class="filters">
+            <h3>🔍 Filtros de Busca</h3>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="searchText">Buscar por texto:</label>
+                    <input type="text" id="searchText" placeholder="Digite palavras-chave...">
+                </div>
+                <div class="filter-group">
+                    <label for="dateFrom">Data inicial:</label>
+                    <input type="date" id="dateFrom">
+                </div>
+                <div class="filter-group">
+                    <label for="dateTo">Data final:</label>
+                    <input type="date" id="dateTo">
+                </div>
+                <div class="filter-group">
+                    <label for="sortBy">Ordenar por:</label>
+                    <select id="sortBy">
+                        <option value="date_desc">Data (mais recente)</option>
+                        <option value="date_asc">Data (mais antigo)</option>
+                        <option value="user_asc">Usuário (A-Z)</option>
+                        <option value="user_desc">Usuário (Z-A)</option>
+                    </select>
+                </div>
+                <button class="filter-button" onclick="applyFilters()">Aplicar Filtros</button>
+            </div>
+        </div>
+
+        <div class="prayers-list">
+            <h3 id="listTitle">📋 Lista de Pedidos</h3>
+            <div id="prayersList">
+                <div class="loading">⏳ Carregando pedidos de oração...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div id="editPrayerModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditPrayerModal()">&times;</span>
+            <h2>✏️ Editar Pedido de Oração</h2>
+            <form id="editPrayerForm">
+                <input type="hidden" id="editPrayerId" name="id">
+                
+                <div class="form-group">
+                    <label for="editPrayerCategory">Motivo de Oração:</label>
+                    <select id="editPrayerCategory" name="category" required>
+                        <option value="">Selecione um motivo</option>
+                        <option value="saude">🏥 Saúde</option>
+                        <option value="familia">👨‍👩‍👧‍👦 Família</option>
+                        <option value="trabalho">💼 Trabalho</option>
+                        <option value="financas">💰 Finanças</option>
+                        <option value="relacionamentos">❤️ Relacionamentos</option>
+                        <option value="estudos">📚 Estudos</option>
+                        <option value="espiritual">🙏 Vida Espiritual</option>
+                        <option value="outros">🌟 Outros</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editPrayerDescription">Descrição:</label>
+                    <textarea id="editPrayerDescription" name="description" placeholder="Compartilhe os detalhes do seu pedido de oração..." maxlength="2000" required></textarea>
+                    <div class="character-counter">
+                        <span id="editCharCount">0</span>/2000 caracteres
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditPrayerModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">💾 Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Testemunho -->
+    <div id="testimonyModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeTestimonyModal()">&times;</span>
+            <h2>✨ Adicionar Testemunho</h2>
+            <form id="testimonyForm">
+                <input type="hidden" id="testimonyPrayerId" name="prayerId">
+                
+                <div class="form-group">
+                    <label for="testimonyText">Compartilhe seu testemunho:</label>
+                    <textarea id="testimonyText" name="testimony" placeholder="Conte como Deus agiu nesta situação..." maxlength="1000" required></textarea>
+                    <div class="character-counter">
+                        <span id="testimonyCharCount">0</span>/1000 caracteres
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeTestimonyModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">✨ Compartilhar Testemunho</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            position: relative;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            top: 15px;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .character-counter {
+            text-align: right;
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        .character-counter.warning {
+            color: #f59e0b;
+        }
+
+        .character-counter.danger {
+            color: #ef4444;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8fafc;
+            color: #64748b;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+    </style>
+
+    <script>
+        // Função para obter o token de autenticação
+        function getAuthToken() {
+            const sessionData = localStorage.getItem('userSession') || sessionStorage.getItem('userSession');
+            if (sessionData) {
+                try {
+                    const session = JSON.parse(sessionData);
+                    return session.token;
+                } catch (error) {
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        // Configurações de status
+        const statusConfig = {
+            ativo: {
+                title: 'Pedidos Aguardando Oração',
+                icon: '📋',
+                description: 'Pedidos de oração que estão aguardando atenção e ainda não foram respondidos.',
+                class: 'status-active'
+            },
+            em_oracao: {
+                title: 'Em Oração',
+                icon: '🙏',
+                description: 'Pedidos que estão sendo ativamente orados pela comunidade.',
+                class: 'status-praying'
+            },
+            respondido: {
+                title: 'Respondidos',
+                icon: '✅',
+                description: 'Pedidos de oração que foram respondidos e testemunhados.',
+                class: 'status-answered'
+            },
+            cancelado: {
+                title: 'Cancelados',
+                icon: '❌',
+                description: 'Pedidos que foram cancelados pelo usuário ou administrador.',
+                class: 'status-cancelled'
+            },
+            // Mapeamentos alternativos para compatibilidade
+            active: {
+                title: 'Pedidos Aguardando Oração',
+                icon: '📋',
+                description: 'Pedidos de oração que estão aguardando atenção e ainda não foram respondidos.',
+                class: 'status-active'
+            },
+            praying: {
+                title: 'Em Oração',
+                icon: '🙏',
+                description: 'Pedidos que estão sendo ativamente orados pela comunidade.',
+                class: 'status-praying'
+            },
+            answered: {
+                title: 'Respondidos',
+                icon: '✅',
+                description: 'Pedidos de oração que foram respondidos e testemunhados.',
+                class: 'status-answered'
+            },
+            cancelled: {
+                title: 'Cancelados',
+                icon: '❌',
+                description: 'Pedidos que foram cancelados pelo usuário ou administrador.',
+                class: 'status-cancelled'
+            }
+        };
+
+        let currentStatus = 'ativo';
+        let allPrayers = [];
+        let filteredPrayers = [];
+
+        // Função para obter parâmetros da URL
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Função para configurar a página baseada no status
+        function setupPage() {
+            currentStatus = getUrlParameter('status') || 'ativo';
+            const config = statusConfig[currentStatus];
+            
+            if (config) {
+                document.getElementById('pageTitle').textContent = config.title;
+                document.getElementById('statusIcon').textContent = config.icon;
+                document.getElementById('statusTitle').textContent = config.title;
+                document.getElementById('statusDescription').textContent = config.description;
+                document.getElementById('listTitle').textContent = `${config.icon} Lista de ${config.title}`;
+                
+                const statusInfo = document.getElementById('statusInfo');
+                statusInfo.className = `status-info ${config.class}`;
+            }
+        }
+
+        // Função para carregar pedidos de oração
+        async function loadPrayers() {
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                const response = await fetch(`/api/admin/prayer-requests?status=${currentStatus}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/login.html';
+                        return;
+                    }
+                    throw new Error('Erro ao carregar pedidos');
+                }
+                
+                const data = await response.json();
+                allPrayers = data.prayers || [];
+                filteredPrayers = [...allPrayers];
+                
+                // Atualizar contador
+                document.getElementById('statusCount').textContent = allPrayers.length;
+                
+                // Renderizar lista
+                renderPrayersList();
+                
+            } catch (error) {
+                console.error('Erro ao carregar pedidos:', error);
+                document.getElementById('prayersList').innerHTML = `
+                    <div class="no-data">
+                        <div class="no-data-icon">⚠️</div>
+                        <h3>Erro ao carregar dados</h3>
+                        <p>Não foi possível carregar os pedidos de oração. Tente novamente.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Função para renderizar lista de pedidos
+        function renderPrayersList() {
+            const container = document.getElementById('prayersList');
+            
+            if (filteredPrayers.length === 0) {
+                container.innerHTML = `
+                    <div class="no-data">
+                        <div class="no-data-icon">📭</div>
+                        <h3>Nenhum pedido encontrado</h3>
+                        <p>Não há pedidos de oração nesta categoria ou que correspondam aos filtros aplicados.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = filteredPrayers.map(prayer => `
+                <div class="prayer-item">
+                    <div class="prayer-header">
+                        <div class="prayer-user">👤 ${prayer.userName || 'Usuário Anônimo'}</div>
+                        <div class="prayer-date">📅 ${formatDate(prayer.createdAt)}</div>
+                    </div>
+                    <div class="prayer-content">
+                        ${prayer.description || 'Descrição não disponível'}
+                    </div>
+                    <div class="prayer-actions">
+                        <button class="action-button view" onclick="viewPrayer(${prayer.id})">
+                            👁️ Visualizar
+                        </button>
+                        ${prayer.status !== 'respondido' && prayer.status !== 'answered' ? `
+                            <button class="action-button edit" onclick="editPrayer(${prayer.id})">
+                                ✏️ Editar
+                            </button>
+                        ` : ''}
+                        <button class="action-button praying" onclick="markAsPraying(${prayer.id})">
+                            🙏 Em Oração
+                        </button>
+                        ${prayer.status !== 'respondido' && prayer.status !== 'answered' ? `
+                            <button class="action-button answered" onclick="markAsAnswered(${prayer.id})">
+                                ✅ Respondido
+                            </button>
+                        ` : ''}
+                        <button class="action-button testimony" onclick="addTestimony(${prayer.id})">
+                            ✨ Testemunhar
+                        </button>
+                        <button class="action-button delete" onclick="deletePrayer(${prayer.id})">
+                            🗑️ Excluir
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Função para formatar data
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Função para aplicar filtros
+        function applyFilters() {
+            const searchText = document.getElementById('searchText').value.toLowerCase();
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            const sortBy = document.getElementById('sortBy').value;
+            
+            filteredPrayers = allPrayers.filter(prayer => {
+                // Filtro de texto
+                if (searchText && !prayer.description.toLowerCase().includes(searchText) && 
+                    !prayer.userName.toLowerCase().includes(searchText)) {
+                    return false;
+                }
+                
+                // Filtro de data
+                const prayerDate = new Date(prayer.createdAt);
+                if (dateFrom && prayerDate < new Date(dateFrom)) {
+                    return false;
+                }
+                if (dateTo && prayerDate > new Date(dateTo + 'T23:59:59')) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            // Aplicar ordenação
+            filteredPrayers.sort((a, b) => {
+                switch (sortBy) {
+                    case 'date_asc':
+                        return new Date(a.createdAt) - new Date(b.createdAt);
+                    case 'date_desc':
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    case 'user_asc':
+                        return a.userName.localeCompare(b.userName);
+                    case 'user_desc':
+                        return b.userName.localeCompare(a.userName);
+                    default:
+                        return 0;
+                }
+            });
+            
+            renderPrayersList();
+        }
+
+        // Funções de ação administrativas
+        function viewPrayer(id) {
+            const prayer = allPrayers.find(p => p.id === id);
+            if (prayer) {
+                alert(`Pedido de ${prayer.userName}:\n\n${prayer.description}\n\nStatus: ${prayer.status}\nCriado em: ${formatDate(prayer.createdAt)}`);
+            }
+        }
+
+        async function editPrayer(id) {
+            const prayer = allPrayers.find(p => p.id === id);
+            if (!prayer) {
+                alert('Pedido não encontrado');
+                return;
+            }
+            
+            // Preencher o modal de edição
+            document.getElementById('editPrayerId').value = prayer.id;
+            document.getElementById('editPrayerCategory').value = prayer.category;
+            document.getElementById('editPrayerDescription').value = prayer.description;
+            
+            // Atualizar contador de caracteres
+            updateCharacterCounter('editPrayerDescription', 'editCharCount');
+            
+            // Mostrar modal
+            document.getElementById('editPrayerModal').style.display = 'block';
+        }
+
+        async function deletePrayer(id) {
+            if (confirm('Tem certeza que deseja excluir este pedido de oração? Esta ação não pode ser desfeita.')) {
+                try {
+                    const token = getAuthToken();
+                    const response = await fetch(`/api/users/admin/prayer-requests/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('Pedido excluído com sucesso!');
+                        loadPrayers(); // Recarregar lista
+                    } else {
+                        alert(data.message || 'Erro ao excluir pedido');
+                    }
+                } catch (error) {
+                    console.error('Erro ao excluir pedido:', error);
+                    alert('Erro de conexão. Tente novamente.');
+                }
+            }
+        }
+
+        async function markAsPraying(id) {
+            if (confirm('Marcar este pedido como "Em Oração"?')) {
+                await updatePrayerStatus(id, 'praying');
+            }
+        }
+
+        async function markAsAnswered(id) {
+            if (confirm('Marcar este pedido como "Respondido"?')) {
+                await updatePrayerStatus(id, 'answered');
+            }
+        }
+
+        async function updatePrayerStatus(id, status) {
+            try {
+                const token = getAuthToken();
+                const response = await fetch(`/api/users/admin/prayer-requests/${id}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Status atualizado com sucesso!');
+                    loadPrayers(); // Recarregar lista
+                } else {
+                    alert(data.message || 'Erro ao atualizar status');
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar status:', error);
+                alert('Erro de conexão. Tente novamente.');
+            }
+        }
+
+        function addTestimony(id) {
+            document.getElementById('testimonyPrayerId').value = id;
+            document.getElementById('testimonyText').value = '';
+            document.getElementById('testimonyCharCount').textContent = '0';
+            document.querySelector('#testimonyModal .character-counter').classList.remove('warning', 'danger');
+            document.getElementById('testimonyModal').style.display = 'block';
+        }
+
+        // Funções dos modais
+        function closeEditPrayerModal() {
+            document.getElementById('editPrayerModal').style.display = 'none';
+            document.getElementById('editPrayerForm').reset();
+        }
+
+        function closeTestimonyModal() {
+            document.getElementById('testimonyModal').style.display = 'none';
+            document.getElementById('testimonyForm').reset();
+        }
+
+        // Função para atualizar contador de caracteres
+        function updateCharacterCounter(textareaId, counterId) {
+            const textarea = document.getElementById(textareaId);
+            const counter = document.getElementById(counterId);
+            const maxLength = parseInt(textarea.getAttribute('maxlength'));
+            const currentLength = textarea.value.length;
+            
+            counter.textContent = currentLength;
+            
+            const counterElement = counter.parentElement;
+            counterElement.classList.remove('warning', 'danger');
+            
+            if (currentLength > maxLength * 0.9) {
+                counterElement.classList.add('danger');
+            } else if (currentLength > maxLength * 0.8) {
+                counterElement.classList.add('warning');
+            }
+        }
+
+        // Event listeners para os formulários
+        document.addEventListener('DOMContentLoaded', function() {
+            setupPage();
+            loadPrayers();
+            
+            // Event listener para o formulário de edição
+            const editForm = document.getElementById('editPrayerForm');
+            if (editForm) {
+                editForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(editForm);
+                    const prayerId = formData.get('id');
+                    const category = formData.get('category');
+                    const description = formData.get('description');
+                    
+                    try {
+                        const token = getAuthToken();
+                        const response = await fetch(`/api/pedidos/admin/${prayerId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ category, description })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            alert('Pedido atualizado com sucesso!');
+                            closeEditPrayerModal();
+                            loadPrayers(); // Recarregar lista
+                        } else {
+                            alert(data.message || 'Erro ao atualizar pedido');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao atualizar pedido:', error);
+                        alert('Erro de conexão. Tente novamente.');
+                    }
+                });
+            }
+            
+            // Event listener para o formulário de testemunho
+            const testimonyForm = document.getElementById('testimonyForm');
+            if (testimonyForm) {
+                testimonyForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(testimonyForm);
+                    const prayerId = formData.get('prayerId');
+                    const testimony = formData.get('testimony');
+                    
+                    try {
+                        const token = getAuthToken();
+                        const response = await fetch('/api/testimonies', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ 
+                                prayer_request_id: prayerId, 
+                                testimony: testimony 
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            alert('Testemunho compartilhado com sucesso!');
+                            closeTestimonyModal();
+                        } else {
+                            alert(data.message || 'Erro ao compartilhar testemunho');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao compartilhar testemunho:', error);
+                        alert('Erro de conexão. Tente novamente.');
+                    }
+                });
+            }
+            
+            // Event listeners para contadores de caracteres
+            const editDescription = document.getElementById('editPrayerDescription');
+            if (editDescription) {
+                editDescription.addEventListener('input', function() {
+                    updateCharacterCounter('editPrayerDescription', 'editCharCount');
+                });
+            }
+            
+            const testimonyText = document.getElementById('testimonyText');
+            if (testimonyText) {
+                testimonyText.addEventListener('input', function() {
+                    updateCharacterCounter('testimonyText', 'testimonyCharCount');
+                });
+            }
+            
+            // Event listeners para fechar modais ao clicar fora
+            window.addEventListener('click', function(event) {
+                const editModal = document.getElementById('editPrayerModal');
+                const testimonyModal = document.getElementById('testimonyModal');
+                
+                if (event.target === editModal) {
+                    closeEditPrayerModal();
+                }
+                
+                if (event.target === testimonyModal) {
+                    closeTestimonyModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

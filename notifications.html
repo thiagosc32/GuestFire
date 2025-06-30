@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificações - Sistema de Oração</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .notifications-container {
+            background: white;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            overflow: hidden;
+            min-width: 40px;
+            justify-content: center;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .back-btn:active {
+            transform: translateY(0);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .back-btn:active {
+            transform: translateY(-1px) scale(1.02);
+            transition: all 0.1s ease;
+        }
+
+        .back-btn .btn-icon {
+            font-size: 16px;
+            font-weight: 900;
+            transition: transform 0.3s ease;
+        }
+
+        .back-btn:hover .btn-icon {
+            transform: translateX(-2px);
+        }
+
+        .notifications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .notification-item {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .notification-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-item.unread {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%);
+        }
+
+        .notification-item.unread::before {
+            content: '';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 10px;
+            height: 10px;
+            background: #2196f3;
+            border-radius: 50%;
+        }
+
+        .notification-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .notification-time {
+            color: #666;
+            font-size: 0.9rem;
+            margin-left: auto;
+        }
+
+        .notification-content {
+            color: #555;
+            line-height: 1.5;
+            margin-left: 2.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #666;
+        }
+
+        .empty-state .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-tab {
+            background: transparent;
+            border: 2px solid #e9ecef;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .filter-tab:hover:not(.active) {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+                align-items: stretch;
+            }
+
+            .notifications-container {
+                padding: 1rem;
+                margin: 0;
+                max-height: 100vh;
+                min-height: 100vh;
+                border-radius: 0;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+                text-align: center;
+            }
+
+            .filter-tabs {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .notification-content {
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* Estilos para badges de anúncios */
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-transform: capitalize;
+            margin-right: 0.5rem;
+        }
+
+        /* Badges de tipo */
+        .badge-general {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge-prayer {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .badge-event {
+            background-color: #e8f5e8;
+            color: #388e3c;
+        }
+
+        .badge-maintenance {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+
+        /* Badges de prioridade */
+        .badge-low {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .badge-medium {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .badge-high {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-urgent {
+            background-color: #ffcdd2;
+            color: #b71c1c;
+            font-weight: 600;
+        }
+
+        /* Estilos para metadados dos anúncios */
+        .notification-meta {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .notification-author {
+            font-style: italic;
+            color: #888;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+    }
+    </style>
+</head>
+<body>
+    <div class="notifications-container">
+        <div class="header">
+            <div class="header-left">
+                <a href="/dashboard.html" class="back-btn">
+                    <span class="btn-icon">←</span>
+                </a>
+                <h1>🔔 Notificações</h1>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterNotifications('all', this)">Todas</button>
+                <button class="filter-tab" onclick="filterNotifications('unread', this)">Não Lidas</button>
+                <button class="filter-tab" onclick="filterNotifications('prayers', this)">Orações</button>
+                <button class="filter-tab" onclick="filterNotifications('system', this)">Sistema</button>
+            </div>
+
+            <div class="notifications-list" id="notifications-list" style="flex: 1; overflow-y: auto;">
+                <!-- Notificações serão carregadas aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Função para filtrar notificações
+        function filterNotifications(type, element) {
+            // Atualizar botões ativos
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            element.classList.add('active');
+
+            // Recarregar notificações com o novo filtro
+            console.log('Filtrando por:', type);
+            loadNotifications(type);
+        }
+
+        // Sistema de notificações reais
+        let notifications = [];
+
+        // Função para obter token de autenticação
+        function getAuthToken() {
+            // Primeiro tenta localStorage (remember me)
+            let sessionData = localStorage.getItem('userSession');
+            
+            // Se não encontrar, tenta sessionStorage
+            if (!sessionData) {
+                sessionData = sessionStorage.getItem('userSession');
+            }
+            
+            // Se ainda não encontrar, tenta o token direto (compatibilidade)
+            if (!sessionData) {
+                return localStorage.getItem('token') || localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+            }
+            
+            try {
+                const session = JSON.parse(sessionData);
+                return session.token;
+            } catch (error) {
+                console.error('Erro ao parsear sessão:', error);
+                // Remove sessão inválida
+                localStorage.removeItem('userSession');
+                sessionStorage.removeItem('userSession');
+                return null;
+            }
+        }
+
+        // Função para carregar notificações da API
+        async function loadNotifications(filter = 'all') {
+            const container = document.getElementById('notifications-list');
+            
+            try {
+                const token = getAuthToken();
+                if (!token) {
+                    console.error('Token de autenticação não encontrado');
+                    // Para desenvolvimento, usar dados vazios
+                    notifications = [];
+                    updateNotificationsList();
+                    return;
+                }
+                
+                const response = await fetch(`/api/notifications?filter=${filter}&limit=50`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Garantir que result.data é um array válido e filtrar valores inválidos
+                    const rawData = result.data || [];
+                    notifications = Array.isArray(rawData) ? 
+                        rawData.filter(n => n && typeof n === 'object' && n.title && n.content) : [];
+                    updateNotificationsList();
+                    updateUnreadCount(result.unread_count);
+                } else {
+                    console.error('Erro ao carregar notificações:', result.message);
+                    notifications = [];
+                    updateNotificationsList();
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar notificações:', error);
+                notifications = [];
+                updateNotificationsList();
+            }
+        }
+
+
+
+        // Função para atualizar lista de notificações
+        function updateNotificationsList() {
+            const container = document.getElementById('notifications-list');
+            const activeTab = document.querySelector('.filter-tab.active');
+            const filter = getFilterFromTab(activeTab);
+            
+            // Garantir que notifications é um array válido e filtrar valores undefined/null
+            const validNotifications = Array.isArray(notifications) ? 
+                notifications.filter(n => n && typeof n === 'object' && n.title && n.content) : [];
+            
+            let filteredNotifications = validNotifications;
+            
+            if (filter === 'unread') {
+                filteredNotifications = validNotifications.filter(n => !n.read);
+            } else if (filter === 'prayers') {
+                filteredNotifications = validNotifications.filter(n => n.type === 'prayer');
+            } else if (filter === 'system') {
+                filteredNotifications = validNotifications.filter(n => n.type === 'system');
+            }
+            
+            if (filteredNotifications.length === 0) {
+                container.innerHTML = `
+                    <div class="notification-item">
+                        <div class="notification-header">
+                            <span class="notification-icon">✨</span>
+                            <span class="notification-title">Bem-vindos ao Sistema de Oração</span>
+                            <span class="notification-time">Sistema</span>
+                        </div>
+                        <div class="notification-content">
+                            Seja bem-vindo ao nosso sistema de orações. Explore as funcionalidades e compartilhe suas experiências.
+                        </div>
+                    </div>
+                    <div class="empty-state">
+                        <div class="icon">🔔</div>
+                        <h3>Nenhuma notificação adicional</h3>
+                        <p>Você não possui outras notificações deste tipo no momento.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="notification-item">
+                    <div class="notification-header">
+                        <span class="notification-icon">✨</span>
+                        <span class="notification-title">Bem-vindos ao Sistema de Oração</span>
+                        <span class="notification-time">Sistema</span>
+                    </div>
+                    <div class="notification-content">
+                        Seja bem-vindo ao nosso sistema de orações. Explore as funcionalidades e compartilhe suas experiências.
+                    </div>
+                </div>
+            ` + filteredNotifications.map(notification => `
+                <div class="notification-item ${notification.read ? '' : 'unread'}" data-id="${notification.id || ''}">
+                    <div class="notification-header">
+                        <span class="notification-icon">${notification.icon || '📝'}</span>
+                        <span class="notification-title">${notification.title || 'Sem título'}</span>
+                        <span class="notification-time">${notification.time || 'Agora'}</span>
+                    </div>
+                    <div class="notification-content">
+                        ${notification.content || 'Sem conteúdo'}
+                    </div>
+                </div>
+            `).join('');
+            
+            // Adicionar event listeners para marcar como lida
+            document.querySelectorAll('.notification-item.unread').forEach(item => {
+                item.addEventListener('click', function() {
+                    markAsRead(this.dataset.id);
+                });
+            });
+        }
+
+        // Função para adicionar nova notificação
+        function addNotification(notification) {
+            // Validar se a notificação tem os campos obrigatórios
+            if (!notification || typeof notification !== 'object' || !notification.title || !notification.content) {
+                console.warn('Tentativa de adicionar notificação inválida:', notification);
+                return;
+            }
+            
+            notifications.unshift({
+                id: Date.now().toString(),
+                ...notification,
+                time: new Date().toLocaleString('pt-BR'),
+                read: false
+            });
+            
+            // Recarregar notificações se estiver na aba 'Todas' ou na aba correspondente
+            const activeTab = document.querySelector('.filter-tab.active');
+            const activeFilter = activeTab.textContent.toLowerCase();
+            
+            if (activeFilter === 'todas' || 
+                (activeFilter === 'não lidas' && !notification.read) ||
+                (activeFilter === 'orações' && notification.type === 'prayer') ||
+                (activeFilter === 'sistema' && notification.type === 'system')) {
+                loadNotifications(getFilterType(activeFilter));
+            }
+            
+            // Atualizar contador de não lidas (se implementado)
+            updateUnreadCount();
+        }
+
+        // Função para marcar notificação como lida
+        async function markAsRead(notificationId) {
+            try {
+                const token = getAuthToken();
+                if (token) {
+                    const response = await fetch(`/api/notifications/${notificationId}/read`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (!result.success) {
+                        console.error('Erro ao marcar como lida:', result.message);
+                        return;
+                    }
+                }
+                
+                // Atualizar localmente
+                const notification = notifications.find(n => n.id === notificationId);
+                if (notification && !notification.read) {
+                    notification.read = true;
+                    
+                    // Atualizar visualmente
+                    const element = document.querySelector(`[data-id="${notificationId}"]`);
+                    if (element) {
+                        element.classList.remove('unread');
+                    }
+                    
+                    // Atualizar contador
+                    updateUnreadCount();
+                }
+                
+            } catch (error) {
+                console.error('Erro ao marcar como lida:', error);
+            }
+        }
+
+        // Função para atualizar contador de não lidas
+        function updateUnreadCount(count = null) {
+            let unreadCount;
+            if (count !== null) {
+                unreadCount = count;
+            } else {
+                unreadCount = notifications.filter(n => !n.read).length;
+            }
+            
+            // Atualizar badge ou contador na interface (se implementado)
+            const badge = document.querySelector('.notification-badge');
+            if (badge) {
+                badge.textContent = unreadCount;
+                badge.style.display = unreadCount > 0 ? 'block' : 'none';
+            }
+            
+            console.log(`Notificações não lidas: ${unreadCount}`);
+        }
+
+        // Função auxiliar para converter texto do filtro para tipo
+        function getFilterType(filterText) {
+            switch(filterText) {
+                case 'todas': return 'all';
+                case 'não lidas': return 'unread';
+                case '📢 anúncios': return 'announcements';
+                case 'orações': return 'prayers';
+                case 'sistema': return 'system';
+                default: return 'all';
+            }
+        }
+
+        // Função para obter filtro do botão ativo
+        function getFilterFromTab(tab) {
+            if (!tab) return 'all';
+            const text = tab.textContent.toLowerCase();
+            return getFilterType(text);
+        }
+
+        // API para integração com o backend
+        const NotificationAPI = {
+            // Buscar notificações do servidor
+            async fetchNotifications() {
+                try {
+                    // const response = await fetch('/api/notifications');
+                    // const data = await response.json();
+                    // notifications = data.notifications || [];
+                    console.log('API: Buscando notificações do servidor...');
+                } catch (error) {
+                    console.error('Erro ao buscar notificações:', error);
+                }
+            },
+            
+            // Marcar como lida no servidor
+            async markAsRead(notificationId) {
+                try {
+                    // await fetch(`/api/notifications/${notificationId}/read`, { method: 'POST' });
+                    console.log(`API: Marcando notificação ${notificationId} como lida`);
+                } catch (error) {
+                    console.error('Erro ao marcar como lida:', error);
+                }
+            },
+            
+            // Configurar WebSocket para notificações em tempo real
+            setupRealTimeNotifications() {
+                // const socket = io();
+                // socket.on('new-notification', (notification) => {
+                //     addNotification(notification);
+                // });
+                console.log('API: Configurando notificações em tempo real...');
+            }
+        }
+
+
+
+        // Inicializar sistema de notificações
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar autenticação (opcional para desenvolvimento)
+            const token = getAuthToken();
+            
+            // Carregar notificações iniciais
+            loadNotifications();
+            
+            // Configurar atualização automática a cada 30 segundos
+            setInterval(() => {
+                if (!document.hidden) {
+                    loadNotifications();
+                }
+            }, 30000);
+            
+            // Atualizar contador inicial
+            updateUnreadCount();
+        });
+        
+        // Função para carregar anúncios
+        async function loadAnnouncements() {
+            const container = document.getElementById('notifications-list');
+            
+            try {
+                const token = getAuthToken();
+                const response = await fetch('/api/announcements', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const announcements = result.data;
+                    
+                    if (announcements.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="icon">📢</div>
+                                <h3>Nenhum anúncio</h3>
+                                <p>Não há anúncios disponíveis no momento.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    container.innerHTML = announcements.map(announcement => {
+                        const date = new Date(announcement.created_at);
+                        const formattedDate = date.toLocaleDateString('pt-BR');
+                        const formattedTime = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                        
+                        return `
+                        <div class="notification-item" data-id="${announcement.id}">
+                            <div class="notification-header">
+                                <span class="notification-icon">📢</span>
+                                <span class="notification-title">${announcement.title}</span>
+                                <span class="notification-time">${formattedDate} às ${formattedTime}</span>
+                            </div>
+                            <div class="notification-content">
+                                ${announcement.content}
+                                <div class="notification-meta">
+                                    <span class="notification-author">Por: GuestFire</span>
+                                    <div style="margin-top: 0.5rem;">
+                                        <span class="badge badge-${announcement.type}">${announcement.type}</span>
+                                        <span class="badge badge-${announcement.priority}">${announcement.priority}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                    }).join('');
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">⚠️</div>
+                            <h3>Erro ao carregar anúncios</h3>
+                            <p>Não foi possível carregar os anúncios. Tente novamente mais tarde.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar anúncios:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">⚠️</div>
+                        <h3>Erro de conexão</h3>
+                        <p>Não foi possível conectar ao servidor. Verifique sua conexão.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Configurar visibilidade da página para pausar/retomar atualizações
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // Página ficou visível, recarregar notificações
+                loadNotifications();
+            }
+        });
+        
+        // Exemplo de como adicionar uma nova notificação (para testes)
+        // setTimeout(() => {
+        //     addNotification({
+        //         icon: '🙏',
+        //         title: 'Nova oração',
+        //         content: 'Alguém adicionou uma nova oração que pode interessar você.',
+        //         type: 'prayer'
+        //     });
+        // }, 5000);
+    </script>
+</body>
+</html>

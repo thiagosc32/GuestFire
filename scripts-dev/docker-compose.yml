@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  login-system:
+    build:
+      context: ..
+      dockerfile: scripts-dev/Dockerfile
+    container_name: login-system-app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./database:/app/database
+      - ./logs:/app/logs
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Opcional: Adicionar um proxy reverso nginx
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: login-system-nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf
+  #   depends_on:
+  #     - login-system
+  #   restart: unless-stopped
+
+volumes:
+  database_data:
+  logs_data:

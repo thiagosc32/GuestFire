@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Estatísticas Admin</title>
+</head>
+<body>
+    <h1>Teste de Estatísticas Admin</h1>
+    <button onclick="testStats()">Testar API de Estatísticas</button>
+    <div id="result"></div>
+
+    <script>
+        // Detecta se estamos usando localtunnel ou localhost
+        const isLocaltunnel = window.location.hostname.includes('.loca.lt');
+        const API_BASE_URL = isLocaltunnel 
+            ? `${window.location.protocol}//${window.location.hostname}/api`
+            : `${window.location.protocol}//${window.location.hostname}:${window.location.port || '3000'}/api`;
+        
+        function getAuthToken() {
+            // Primeiro tenta localStorage (remember me)
+            let sessionData = localStorage.getItem('userSession');
+            
+            // Se não encontrar, tenta sessionStorage
+            if (!sessionData) {
+                sessionData = sessionStorage.getItem('userSession');
+            }
+            
+            // Se ainda não encontrar, tenta o token direto (compatibilidade)
+            if (!sessionData) {
+                return localStorage.getItem('token');
+            }
+            
+            try {
+                const session = JSON.parse(sessionData);
+                return session.token;
+            } catch (error) {
+                console.error('Erro ao parsear sessão:', error);
+                return null;
+            }
+        }
+        
+        async function testStats() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testando...';
+            
+            try {
+                const token = getAuthToken();
+                console.log('Token:', token ? 'Encontrado' : 'Não encontrado');
+                console.log('API URL:', `${API_BASE_URL}/users/admin/stats`);
+                
+                const response = await fetch(`${API_BASE_URL}/users/admin/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                resultDiv.innerHTML = `
+                    <h3>Sucesso!</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                console.error('Erro ao testar estatísticas:', error);
+                resultDiv.innerHTML = `
+                    <h3>Erro:</h3>
+                    <p style="color: red;">${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

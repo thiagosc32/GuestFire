@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações do Sistema - Admin</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .settings-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .settings-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .settings-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .settings-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-label {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .setting-description {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .setting-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 25px;
+            background: #ccc;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle-switch.active {
+            background: #4CAF50;
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 21px;
+            height: 21px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        
+        .toggle-switch.active::after {
+            transform: translateX(25px);
+        }
+        
+        .btn-back {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        .btn-back:hover {
+            background: #5a6268;
+        }
+        
+        .btn-save {
+            background: #28a745;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        
+        .btn-save:hover {
+            background: #218838;
+        }
+        
+        .input-field {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 200px;
+        }
+        
+        .select-field {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 150px;
+        }
+        
+        @media (max-width: 768px) {
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .setting-control {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .back-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+
+        .back-btn:hover::before {
+            left: 100%;
+        }
+
+        .back-btn:active {
+            transform: translateY(-1px) scale(1.02);
+            transition: all 0.1s ease;
+        }
+
+        .back-btn .btn-icon {
+            font-size: 16px;
+            font-weight: 900;
+            transition: transform 0.3s ease;
+        }
+
+        .back-btn:hover .btn-icon {
+            transform: translateX(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+        <a href="admin.html" class="back-btn">
+            <span class="btn-icon">←</span>
+        </a>
+        
+        <div class="settings-header">
+            <h1>⚙️ Configurações do Sistema</h1>
+            <p>Gerencie as configurações gerais da aplicação</p>
+        </div>
+        
+        <!-- Configurações Gerais -->
+        <div class="settings-section">
+            <h3>🔧 Configurações Gerais</h3>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Nome da Aplicação</div>
+                    <div class="setting-description">Nome exibido no cabeçalho da aplicação</div>
+                </div>
+                <div class="setting-control">
+                    <input type="text" class="input-field" value="GuestFIRE" id="appName">
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Descrição da Aplicação</div>
+                    <div class="setting-description">Descrição exibida na página inicial</div>
+                </div>
+                <div class="setting-control">
+                    <input type="text" class="input-field" value="Plataforma de Oração" id="appDescription">
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Modo de Manutenção</div>
+                    <div class="setting-description">Ativar para bloquear acesso de usuários</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch" onclick="toggleSetting(this)" data-setting="maintenance"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Configurações de Usuários -->
+        <div class="settings-section">
+            <h3>👥 Configurações de Usuários</h3>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Registro de Novos Usuários</div>
+                    <div class="setting-description">Permitir que novos usuários se registrem</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch active" onclick="toggleSetting(this)" data-setting="registration"></div>
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Verificação de Email</div>
+                    <div class="setting-description">Exigir verificação de email no registro</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch" onclick="toggleSetting(this)" data-setting="emailVerification"></div>
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Limite de Pedidos por Usuário</div>
+                    <div class="setting-description">Número máximo de pedidos ativos por usuário</div>
+                </div>
+                <div class="setting-control">
+                    <input type="number" class="input-field" value="10" id="maxPrayers" min="1" max="100">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Configurações de Notificações -->
+        <div class="settings-section">
+            <h3>🔔 Configurações de Notificações</h3>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Notificações por Email</div>
+                    <div class="setting-description">Enviar notificações por email</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch active" onclick="toggleSetting(this)" data-setting="emailNotifications"></div>
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Frequência de Notificações</div>
+                    <div class="setting-description">Com que frequência enviar resumos</div>
+                </div>
+                <div class="setting-control">
+                    <select class="select-field" id="notificationFrequency">
+                        <option value="daily">Diário</option>
+                        <option value="weekly" selected>Semanal</option>
+                        <option value="monthly">Mensal</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Configurações de Segurança -->
+        <div class="settings-section">
+            <h3>🔒 Configurações de Segurança</h3>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Autenticação de Dois Fatores</div>
+                    <div class="setting-description">Exigir 2FA para administradores</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch" onclick="toggleSetting(this)" data-setting="twoFactor"></div>
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Tempo de Sessão (minutos)</div>
+                    <div class="setting-description">Tempo antes do logout automático</div>
+                </div>
+                <div class="setting-control">
+                    <input type="number" class="input-field" value="60" id="sessionTimeout" min="15" max="480">
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Log de Atividades</div>
+                    <div class="setting-description">Registrar ações dos administradores</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch active" onclick="toggleSetting(this)" data-setting="activityLog"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Configurações de Backup -->
+        <div class="settings-section">
+            <h3>💾 Configurações de Backup</h3>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Backup Automático</div>
+                    <div class="setting-description">Realizar backup automático do banco de dados</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch active" onclick="toggleSetting(this)" data-setting="autoBackup"></div>
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Frequência de Backup</div>
+                    <div class="setting-description">Com que frequência fazer backup</div>
+                </div>
+                <div class="setting-control">
+                    <select class="select-field" id="backupFrequency">
+                        <option value="daily" selected>Diário</option>
+                        <option value="weekly">Semanal</option>
+                        <option value="monthly">Mensal</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center;">
+            <button class="btn-save" onclick="saveSettings()">💾 Salvar Configurações</button>
+        </div>
+    </div>
+    
+    <script>
+        // Função para alternar configurações toggle
+        function toggleSetting(element) {
+            element.classList.toggle('active');
+        }
+        
+        // Função para salvar configurações
+        function saveSettings() {
+            const settings = {
+                appName: document.getElementById('appName').value,
+                appDescription: document.getElementById('appDescription').value,
+                maxPrayers: document.getElementById('maxPrayers').value,
+                sessionTimeout: document.getElementById('sessionTimeout').value,
+                notificationFrequency: document.getElementById('notificationFrequency').value,
+                backupFrequency: document.getElementById('backupFrequency').value,
+                maintenance: document.querySelector('[data-setting="maintenance"]').classList.contains('active'),
+                registration: document.querySelector('[data-setting="registration"]').classList.contains('active'),
+                emailVerification: document.querySelector('[data-setting="emailVerification"]').classList.contains('active'),
+                emailNotifications: document.querySelector('[data-setting="emailNotifications"]').classList.contains('active'),
+                twoFactor: document.querySelector('[data-setting="twoFactor"]').classList.contains('active'),
+                activityLog: document.querySelector('[data-setting="activityLog"]').classList.contains('active'),
+                autoBackup: document.querySelector('[data-setting="autoBackup"]').classList.contains('active')
+            };
+            
+            // Aqui você pode implementar a lógica para salvar as configurações
+            // Por exemplo, enviar para uma API
+            console.log('Configurações a serem salvas:', settings);
+            
+            // Simular salvamento
+            alert('✅ Configurações salvas com sucesso!');
+        }
+        
+        // Carregar configurações ao inicializar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Aqui você pode implementar a lógica para carregar configurações existentes
+            console.log('Página de configurações carregada');
+        });
+    </script>
+</body>
+</html>

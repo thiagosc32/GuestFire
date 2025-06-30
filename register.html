@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-box">
+            <!-- Formulário de Registro -->
+            <div id="registerSection">
+                <h2>Criar Conta</h2>
+                <form id="registerForm">
+                    <div class="input-group">
+                        <label for="fullName">Nome Completo:</label>
+                        <input type="text" id="fullName" name="fullName" autocomplete="name" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" autocomplete="email" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="password">Senha:</label>
+                        <input type="password" id="password" name="password" autocomplete="new-password" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="confirmPassword">Confirmar Senha:</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required>
+                    </div>
+                    <div class="input-group">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms" class="checkbox-label">Aceito os termos e condições</label>
+                    </div>
+                    <button type="submit" class="login-btn">Criar Conta</button>
+                    <div class="links">
+                        <a href="login.html">Já tem uma conta? Faça login</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Seção de Verificação por Email -->
+            <div id="verificationSection" style="display: none;">
+                <h2>Verificação por Email</h2>
+                <div class="verification-info">
+                    <p>📧 Enviamos um código de verificação para:</p>
+                    <p><strong id="verificationEmail"></strong></p>
+                    <p>Digite o código de 6 dígitos abaixo:</p>
+                </div>
+                <form id="verificationForm">
+                    <div class="input-group">
+                        <label for="verificationCode">Código de Verificação:</label>
+                        <input type="text" id="verificationCode" name="verificationCode" autocomplete="one-time-code" 
+                               maxlength="6" pattern="[0-9]{6}" 
+                               placeholder="000000" required>
+                    </div>
+                    <button type="submit" class="login-btn">Verificar Código</button>
+                    <div class="links">
+                        <a href="#" id="resendCode">Reenviar código</a>
+                        <a href="#" id="backToRegister">Voltar ao cadastro</a>
+                    </div>
+                </form>
+                <div class="verification-timer">
+                    <p>Código expira em: <span id="timer">15:00</span></p>
+                </div>
+            </div>
+
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+    <script src="register.js"></script>
+</body>
+</html>

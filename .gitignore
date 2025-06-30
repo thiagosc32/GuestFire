@@ -1,0 +1,78 @@
+# Dependências
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs
+*.log
+
+# Arquivos temporários
+.tmp/
+.temp/
+
+# Arquivos do sistema operacional
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs e editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Arquivos de build
+build/
+dist/
+
+# Arquivos de teste
+coverage/
+.nyc_output/
+
+# Arquivos de cache
+.cache/
+.parcel-cache/
+
+# Banco de dados
+database/users.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads de usuários
+uploads/profile-pictures/*
+!uploads/profile-pictures/.gitkeep
+
+# Arquivos de backup
+*.bak
+*.backup
+
+# Arquivos específicos do Windows
+*.lnk
+
+# Arquivos específicos do Node.js
+.npm
+.eslintcache
+.node_repl_history
+
+# Arquivos de deploy
+.vercel
+.netlify
+
+# Arquivos de documentação gerados
+docs/build/
