@@ -9,6 +9,7 @@ const session = require('express-session');
 const passport = require('passport');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
+const initDatabase = require('./scripts/init-database');
 
 // Inicializar banco de dados
 const initDatabase = require('./scripts/init-database');
@@ -1775,15 +1776,14 @@ app.use('*', (req, res) => {
     });
 });
 
-// Função para inicializar o servidor
+// Função para iniciar o servidor
 async function startServer() {
     try {
-        // Inicializa o banco de dados primeiro
-        console.log('🔄 Inicializando banco de dados...');
+        // Inicializar banco de dados
         await initDatabase();
-        console.log('✅ Banco de dados inicializado!');
+        console.log('✅ Banco de dados inicializado com sucesso!');
         
-        // Inicia o servidor após a inicialização do banco
+        // Inicia o servidor
         app.listen(PORT, '0.0.0.0', () => {
             console.log('🚀 Servidor iniciado com sucesso!');
             console.log(`📡 Acesso Local: http://localhost:${PORT}`);
@@ -1792,23 +1792,21 @@ async function startServer() {
             console.log('\n📋 Rotas disponíveis:');
             console.log('   GET  /                    - Página de login');
             console.log('   GET  /register            - Página de cadastro');
-    console.log('   GET  /dashboard           - Dashboard');
-    console.log('   POST /api/auth/register   - Cadastrar usuário');
-    console.log('   POST /api/auth/login      - Fazer login');
-    console.log('   POST /api/auth/logout     - Fazer logout');
-    console.log('   GET  /api/users/profile   - Perfil do usuário');
-    console.log('   GET  /test-email          - Testar envio de e-mail');
-    console.log('\n💡 Para inicializar o banco de dados, execute:');
-    console.log('   npm run init-db');
-    console.log('\n🔥 Servidor acessível pela rede local!');
+            console.log('   GET  /dashboard           - Dashboard');
+            console.log('   POST /api/auth/register   - Cadastrar usuário');
+            console.log('   POST /api/auth/login      - Fazer login');
+            console.log('   POST /api/auth/logout     - Fazer logout');
+            console.log('   GET  /api/users/profile   - Perfil do usuário');
+            console.log('   GET  /test-email          - Testar envio de e-mail');
+            console.log('\n🔥 Servidor acessível pela rede local!');
         });
     } catch (error) {
-        console.error('❌ Erro ao inicializar o servidor:', error);
+        console.error('❌ Erro ao inicializar servidor:', error);
         process.exit(1);
     }
 }
 
-// Inicia o servidor
+// Iniciar servidor
 startServer();
 
 // Tratamento de erros não capturados
