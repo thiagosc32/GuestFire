@@ -83,7 +83,6 @@ function insertAdminUser(db, resolve, reject) {
     db.get("SELECT COUNT(*) as count FROM users WHERE admin_level >= 2", (err, row) => {
         if (err) {
             console.error('Erro ao verificar usuários admin:', err.message);
->>>>>>> 20cfb629bfac6759496c1913034a0a69f150f312
             reject(err);
             return;
         }
