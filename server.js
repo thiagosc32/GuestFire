@@ -15,7 +15,6 @@ const joi = require('joi');
 const compression = require('compression');
 const morgan = require('morgan');
 require('dotenv').config();
-const initDatabase = require('./scripts/init-database');
 
 // Inicializar banco de dados
 const initDatabase = require('./scripts/init-database');
